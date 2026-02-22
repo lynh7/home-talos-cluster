@@ -57,6 +57,8 @@ securityContext:
       #- BPF
 bpf:
   masquerade: true
+bgpControlPlane:
+  enabled: true
 l2announcements:
   enabled: true
 hubble:

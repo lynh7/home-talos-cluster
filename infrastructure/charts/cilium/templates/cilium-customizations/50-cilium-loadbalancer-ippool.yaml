@@ -1,0 +1,15 @@
+{{- if .Values.ciliumLoadBalancerIPPools.enabled }}
+{{- range .Values.ciliumLoadBalancerIPPools.pools }}
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: {{ .name | quote }}
+spec:
+  blocks:
+  {{- range .blocks }}
+  - start: {{ .start | quote }}
+    stop: {{ .stop | quote }}
+  {{- end }}
+{{- end }}
+{{- end }}

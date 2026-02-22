@@ -1848,3 +1848,13 @@ spec:
         name: hubble-ui-nginx-conf
       - emptyDir: {}
         name: tmp-dir
+---
+# Source: cilium/templates/cilium-customizations/50-cilium-loadbalancer-ippool.yaml
+apiVersion: "cilium.io/v2"
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: "default-pool"
+spec:
+  blocks:
+  - start: "10.10.0.40"
+    stop: "10.10.0.60"

@@ -115,12 +115,12 @@ ciliumLoadBalancerIPPools:
   pools:
     - name: "default-pool"
       blocks:
-        - cidr: "10.30.0.0/26"
+      - cidr: "10.30.0.0/26"
     # - name: "secondary-pool"
     #   blocks:
-    #     - start: "10.10.1.0"
-    #       stop: "10.10.1.50"
-    
+    #   - start: "10.10.1.0"
+    #     stop: "10.10.1.50"
+
 ciliumL2AnnouncementPolicy:
   enabled: true
   name: "announce-lb"

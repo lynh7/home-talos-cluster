@@ -115,8 +115,7 @@ ciliumLoadBalancerIPPools:
   pools:
     - name: "default-pool"
       blocks:
-        - start: "10.10.0.40"
-          stop: "10.10.0.60"
+        - cidr: "10.30.0.0/26"
     # - name: "secondary-pool"
     #   blocks:
     #     - start: "10.10.1.0"

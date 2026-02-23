@@ -114,6 +114,7 @@ ciliumLoadBalancerIPPools:
   enabled: true
   pools:
     - name: "default-pool"
+      allowFirstLastIPs: No
       blocks:
       - cidr: "10.30.0.2/26"
     # - name: "secondary-pool"

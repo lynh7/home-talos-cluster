@@ -6,6 +6,9 @@ kind: CiliumLoadBalancerIPPool
 metadata:
   name: {{ .name | quote }}
 spec:
+  {{- if .allowFirstLastIPs }}
+  allowFirstLastIPs: {{ .allowFirstLastIPs }}
+  {{- end }}
   blocks:
   {{- range .blocks }}
   - {{- if .cidr }}

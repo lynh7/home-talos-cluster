@@ -1868,5 +1868,6 @@ metadata:
   name: "default-pool"
 spec:
   blocks:
-  - start: "10.10.0.40"
-    stop: "10.10.0.60"
+  - cidr: "10.30.0.0/26"
+  - start: 
+    stop:

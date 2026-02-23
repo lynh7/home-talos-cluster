@@ -120,6 +120,7 @@ ciliumLoadBalancerIPPools:
     #   blocks:
     #     - start: "10.10.1.0"
     #       stop: "10.10.1.50"
+    
 ciliumL2AnnouncementPolicy:
   enabled: true
   name: "announce-lb"

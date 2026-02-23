@@ -64,8 +64,12 @@ l2announcements:
 hubble:
   relay:
     enabled: true
+    nodeSelector: kubernetes.io/hostname=worker-1
   ui:
     enabled: true
+    nodeSelector: kubernetes.io/hostname=worker-1
+    service:
+      type: LoadBalancer
   tls:
     # -- Enable mutual TLS for listenAddress. Setting this value to false is
     # highly discouraged as the Hubble API provides access to potentially

@@ -1860,6 +1860,7 @@ spec:
   loadBalancerIPs: true
   interfaces:
   - "ens18"
+  - "ens19"
 ---
 # Source: cilium/templates/cilium-customizations/50-cilium-loadbalancer-ippool.yaml
 apiVersion: "cilium.io/v2"

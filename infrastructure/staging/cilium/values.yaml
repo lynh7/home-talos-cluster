@@ -127,3 +127,4 @@ ciliumL2AnnouncementPolicy:
   loadBalancerIPs: true
   interfaces:
     - "ens18"
+    - "ens19"

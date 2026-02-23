@@ -99,7 +99,11 @@ cgroup:
     #     memory: 128Mi
   # -- Configure cgroup root where cgroup2 filesystem is mounted on the host (see also: `cgroup.autoMount`)
   hostRoot: /sys/fs/cgroup
-#### IPAM LoadBalancer IP Pool configuration
+
+##################################################
+#### IPAM LoadBalancer IP Pool configuration #####
+##################################################
+
 ciliumLoadBalancerIPPools:
   enabled: true
   pools:
@@ -111,3 +115,9 @@ ciliumLoadBalancerIPPools:
     #   blocks:
     #     - start: "10.10.1.0"
     #       stop: "10.10.1.50"
+ciliumL2AnnouncementPolicy:
+  enabled: true
+  name: "announce-lb"
+  loadBalancerIPs: true
+  interfaces:
+    - "ens18"

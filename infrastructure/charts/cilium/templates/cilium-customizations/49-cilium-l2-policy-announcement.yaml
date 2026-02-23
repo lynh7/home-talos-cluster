@@ -1,0 +1,12 @@
+{{- if .Values.ciliumL2AnnouncementPolicy.enabled }}
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: {{ .Values.ciliumL2AnnouncementPolicy.name | quote }}
+spec:
+  loadBalancerIPs: {{ .Values.ciliumL2AnnouncementPolicy.loadBalancerIPs }}
+  interfaces:
+  {{- range .Values.ciliumL2AnnouncementPolicy.interfaces }}
+  - {{ . | quote }}
+  {{- end }}
+{{- end }}

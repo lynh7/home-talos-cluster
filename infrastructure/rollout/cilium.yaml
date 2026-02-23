@@ -886,7 +886,7 @@ metadata:
     app.kubernetes.io/name: hubble-ui
     app.kubernetes.io/part-of: cilium
 spec:
-  type: "ClusterIP"
+  type: "LoadBalancer"
   selector:
     k8s-app: hubble-ui
   ports:
@@ -1761,6 +1761,7 @@ spec:
                 k8s-app: cilium
             topologyKey: kubernetes.io/hostname
       nodeSelector:
+        kubernetes.io/hostname: worker-1
         kubernetes.io/os: linux
       volumes:
       - name: config
@@ -1840,6 +1841,7 @@ spec:
         volumeMounts:
         terminationMessagePolicy: FallbackToLogsOnError
       nodeSelector:
+        kubernetes.io/hostname: worker-1
         kubernetes.io/os: linux
       volumes:
       - configMap:

@@ -8,9 +8,13 @@ metadata:
 spec:
   blocks:
   {{- range .blocks }}
-  - cidr: {{ .cidr | quote }}
-  - start: {{ .start | quote }}
+  - {{- if .cidr }}
+    cidr: {{ .cidr | quote }}
+    {{- end }}
+    {{- if and .start .stop }}
+    start: {{ .start | quote }}
     stop: {{ .stop | quote }}
+    {{- end }}
   {{- end }}
 {{- end }}
 {{- end }}

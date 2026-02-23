@@ -1849,6 +1849,16 @@ spec:
       - emptyDir: {}
         name: tmp-dir
 ---
+# Source: cilium/templates/cilium-customizations/49-cilium-l2-policy-announcement.yaml
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: "announce-lb"
+spec:
+  loadBalancerIPs: true
+  interfaces:
+  - "ens18"
+---
 # Source: cilium/templates/cilium-customizations/50-cilium-loadbalancer-ippool.yaml
 apiVersion: "cilium.io/v2"
 kind: CiliumLoadBalancerIPPool

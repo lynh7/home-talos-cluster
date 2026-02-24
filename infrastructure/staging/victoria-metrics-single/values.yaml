@@ -7,5 +7,3 @@ server:
       memory: 128Mi
     limits:
       memory: 256Mi
-  # nodeSelector:
-  #   kubernetes.io/hostname: worker-1

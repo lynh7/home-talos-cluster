@@ -53,7 +53,7 @@ type: Opaque
 data:
   
   admin-user: "YWRtaW4="
-  admin-password: "SzhUejM4aTlhajdNdkYzRU10dHJtRmF3YlhDMWVrdjNXVGc0ZmZqeA=="
+  admin-password: "OElTeWd1cEFyekc5M0RRbHpuaW51QXhJRldNT0tRQUFRN0s0aFhWVg=="
   ldap-toml: ""
 ---
 # Source: grafana-stack/charts/grafana-alloy/templates/configmap.yaml
@@ -72,21 +72,34 @@ metadata:
     app.kubernetes.io/component: config
 data:
   config.alloy: |-
+    logging {
+    	level  = "info"
+    	format = "logfmt"
+    }
     
-          discovery.kubernetes "pods" {
-            role = "pod"
-          }
-          
-          prometheus.scrape "kubernetes" {
-            targets = discovery.kubernetes.pods.targets
-            forward_to = [prometheus.remote_write.vm.receiver]
-          }
-          
-          prometheus.remote_write "vm" {
-            endpoint {
-              url = "http://victoria-metrics-server.monitoring.svc.cluster.local:8428/api/v1/write"
-            }
-          }
+    discovery.kubernetes "pods" {
+    	role = "pod"
+    }
+    
+    discovery.kubernetes "nodes" {
+    	role = "node"
+    }
+    
+    discovery.kubernetes "services" {
+    	role = "service"
+    }
+    
+    discovery.kubernetes "endpoints" {
+    	role = "endpoints"
+    }
+    
+    discovery.kubernetes "endpointslices" {
+    	role = "endpointslice"
+    }
+    
+    discovery.kubernetes "ingresses" {
+    	role = "ingress"
+    }
 ---
 # Source: grafana-stack/charts/grafana/templates/configmap.yaml
 apiVersion: v1
@@ -373,7 +386,6 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: alloy
-        checksum/config: fd604e17f452620fd3d999545560237258df0f35316b053a73d79a5427072d3
       labels:
         app.kubernetes.io/name: grafana-alloy
         app.kubernetes.io/instance: grafana-stack
@@ -458,7 +470,7 @@ spec:
       annotations:
         checksum/config: 0e9cbd0ea8e24e32f7dfca5bab17a2ba05652642f0a09a4882833ae88e4cc4a3
         checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
-        checksum/secret: 8c3143729e68f8c56107adb7f98363e92c7cf8b681af0d372fe48ea72bb2f93c
+        checksum/secret: b3948b26a85f604059577140f85ae7438b798e0b39574aa0817a95a2595dd2df
         kubectl.kubernetes.io/default-container: grafana
     spec:
       

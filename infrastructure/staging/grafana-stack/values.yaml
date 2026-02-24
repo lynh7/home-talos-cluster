@@ -3,7 +3,7 @@ grafana:
     type: LoadBalancer
   nodeSelector:
     kubernetes.io/hostname: worker-1
-grafana-alloy: 
+alloy: 
   alloy:
     configMap:
       create: true
@@ -18,4 +18,3 @@ grafana-alloy:
 
   serviceMonitor:
     enabled: false
-    

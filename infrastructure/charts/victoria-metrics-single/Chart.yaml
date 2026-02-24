@@ -16,7 +16,7 @@ apiVersion: v2
 appVersion: v1.120.0
 dependencies:
 - name: victoria-metrics-common
-  repository: https://victoriametrics.github.io/helm-charts
+  repository: "file://./dependencies/victoria-metrics-common"
   version: 0.0.*
 description: VictoriaMetrics Single version - high-performance, cost-effective and
   scalable TSDB, long-term remote storage for Prometheus

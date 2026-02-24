@@ -202,8 +202,7 @@ server:
   podAnnotations: {}
 
   # -- Resource object. Details are [here](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)
-  resources:
-    {}
+  resources: {}
     # limits:
     #   cpu: 500m
     #   memory: 512Mi

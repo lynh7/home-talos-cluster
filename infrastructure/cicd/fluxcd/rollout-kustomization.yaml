@@ -4,7 +4,7 @@ metadata:
   name: rollout
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 2m
   path: ./infrastructure/rollout
   prune: true
   sourceRef:

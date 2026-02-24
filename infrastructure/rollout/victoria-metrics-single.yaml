@@ -114,6 +114,8 @@ spec:
             - name: server-volume
               mountPath: /storage
             
+      nodeSelector: 
+        kubernetes.io/hostname: worker-1
       terminationGracePeriodSeconds: 60
       volumes:
         

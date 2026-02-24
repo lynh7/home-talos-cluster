@@ -7,7 +7,8 @@ appVersion: "1.10.0"
 dependencies:
   - name: grafana
     version: 9.3.0
-    repository: file://../dependencies/grafana
-  - name: grafana-alloy
+    repository: "file://./dependencies/grafana"
+  - name: alloy
+    alias: grafana-alloy
     version: 1.2.0
-    repository: "file://../dependencies/grafana-alloy"
+    repository: "file://./dependencies/alloy"

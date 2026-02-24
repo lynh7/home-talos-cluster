@@ -7,7 +7,6 @@ on:
   push:
     paths:
       - 'infrastructure/staging/**/values.yaml'
-      - 'infrastructure/charts/**'
 
 jobs:
   render:

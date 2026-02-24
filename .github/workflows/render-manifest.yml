@@ -49,6 +49,8 @@ jobs:
               NAMESPACE=$(yq '.namespace' infrastructure/charts/$chart/meta.yaml)
             fi
 
+            helm dependency build infrastructure/charts/$chart
+
             helm template $chart infrastructure/charts/$chart \
               --values infrastructure/staging/$chart/values.yaml \
               --namespace $NAMESPACE \

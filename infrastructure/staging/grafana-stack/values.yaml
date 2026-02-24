@@ -18,3 +18,4 @@ grafana-alloy:
 
   serviceMonitor:
     enabled: false
+    

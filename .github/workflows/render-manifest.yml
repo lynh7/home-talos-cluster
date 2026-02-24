@@ -54,7 +54,7 @@ jobs:
             helm template $chart infrastructure/charts/$chart \
               --values infrastructure/staging/$chart/values.yaml \
               --namespace $NAMESPACE \
-              > infrastructure/rollout/$chart.yaml
+              > infrastructure/rollout/$chart/$chart.yaml
           done
 
       - name: Commit rendered manifests

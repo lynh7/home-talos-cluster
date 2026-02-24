@@ -1,0 +1,628 @@
+---
+# Source: grafana-stack/templates/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged
+---
+# Source: grafana-stack/charts/grafana-alloy/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: true
+metadata:
+  name: grafana-stack-grafana-alloy
+  namespace: monitoring
+  labels:
+    helm.sh/chart: grafana-alloy-1.2.0
+    app.kubernetes.io/name: grafana-alloy
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "v1.10.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: alloy
+    app.kubernetes.io/component: rbac
+---
+# Source: grafana-stack/charts/grafana/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: false
+metadata:
+  labels:
+    helm.sh/chart: grafana-9.3.0
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "12.1.0"
+  name: grafana-stack
+  namespace: monitoring
+---
+# Source: grafana-stack/charts/grafana/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: grafana-stack
+  namespace: monitoring
+  labels:
+    helm.sh/chart: grafana-9.3.0
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "12.1.0"
+type: Opaque
+data:
+  
+  admin-user: "YWRtaW4="
+  admin-password: "OElTeWd1cEFyekc5M0RRbHpuaW51QXhJRldNT0tRQUFRN0s0aFhWVg=="
+  ldap-toml: ""
+---
+# Source: grafana-stack/charts/grafana-alloy/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-stack-grafana-alloy
+  namespace: monitoring
+  labels:
+    helm.sh/chart: grafana-alloy-1.2.0
+    app.kubernetes.io/name: grafana-alloy
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "v1.10.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: alloy
+    app.kubernetes.io/component: config
+data:
+  config.alloy: |-
+    logging {
+    	level  = "info"
+    	format = "logfmt"
+    }
+    
+    discovery.kubernetes "pods" {
+    	role = "pod"
+    }
+    
+    discovery.kubernetes "nodes" {
+    	role = "node"
+    }
+    
+    discovery.kubernetes "services" {
+    	role = "service"
+    }
+    
+    discovery.kubernetes "endpoints" {
+    	role = "endpoints"
+    }
+    
+    discovery.kubernetes "endpointslices" {
+    	role = "endpointslice"
+    }
+    
+    discovery.kubernetes "ingresses" {
+    	role = "ingress"
+    }
+---
+# Source: grafana-stack/charts/grafana/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-stack
+  namespace: monitoring
+  labels:
+    helm.sh/chart: grafana-9.3.0
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "12.1.0"
+data:
+  
+  grafana.ini: |
+    [analytics]
+    check_for_updates = true
+    [grafana_net]
+    url = https://grafana.net
+    [log]
+    mode = console
+    [paths]
+    data = /var/lib/grafana/
+    logs = /var/log/grafana
+    plugins = /var/lib/grafana/plugins
+    provisioning = /etc/grafana/provisioning
+    [server]
+    domain = ''
+---
+# Source: grafana-stack/charts/grafana-alloy/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: grafana-stack-grafana-alloy
+  labels:
+    helm.sh/chart: grafana-alloy-1.2.0
+    app.kubernetes.io/name: grafana-alloy
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "v1.10.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: alloy
+    app.kubernetes.io/component: rbac
+rules:
+  # Rules which allow discovery.kubernetes to function.
+  - apiGroups:
+      - ""
+      - "discovery.k8s.io"
+      - "networking.k8s.io"
+    resources:
+      - endpoints
+      - endpointslices
+      - ingresses
+      - nodes
+      - nodes/proxy
+      - nodes/metrics
+      - pods
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  # Rules which allow loki.source.kubernetes and loki.source.podlogs to work.
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - pods/log
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - "monitoring.grafana.com"
+    resources:
+      - podlogs
+    verbs:
+      - get
+      - list
+      - watch
+  # Rules which allow mimir.rules.kubernetes to work.
+  - apiGroups: ["monitoring.coreos.com"]
+    resources:
+      - prometheusrules
+    verbs:
+      - get
+      - list
+      - watch
+  - nonResourceURLs:
+      - /metrics
+    verbs:
+      - get
+  # Rules for prometheus.kubernetes.*
+  - apiGroups: ["monitoring.coreos.com"]
+    resources:
+      - podmonitors
+      - servicemonitors
+      - probes
+      - scrapeconfigs
+    verbs:
+      - get
+      - list
+      - watch
+  # Rules which allow eventhandler to work.
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - get
+      - list
+      - watch
+  # needed for remote.kubernetes.*
+  - apiGroups: [""]
+    resources:
+      - "configmaps"
+      - "secrets"
+    verbs:
+      - get
+      - list
+      - watch
+  # needed for otelcol.processor.k8sattributes
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["extensions"]
+    resources: ["replicasets"]
+    verbs: ["get", "list", "watch"]
+---
+# Source: grafana-stack/charts/grafana/templates/clusterrole.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  labels:
+    helm.sh/chart: grafana-9.3.0
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "12.1.0"
+  name: grafana-stack-clusterrole
+rules: []
+---
+# Source: grafana-stack/charts/grafana-alloy/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: grafana-stack-grafana-alloy
+  labels:
+    helm.sh/chart: grafana-alloy-1.2.0
+    app.kubernetes.io/name: grafana-alloy
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "v1.10.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: alloy
+    app.kubernetes.io/component: rbac
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: grafana-stack-grafana-alloy
+subjects:
+  - kind: ServiceAccount
+    name: grafana-stack-grafana-alloy
+    namespace: monitoring
+---
+# Source: grafana-stack/charts/grafana/templates/clusterrolebinding.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: grafana-stack-clusterrolebinding
+  labels:
+    helm.sh/chart: grafana-9.3.0
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "12.1.0"
+subjects:
+  - kind: ServiceAccount
+    name: grafana-stack
+    namespace: monitoring
+roleRef:
+  kind: ClusterRole
+  name: grafana-stack-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: grafana-stack/charts/grafana/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: grafana-stack
+  namespace: monitoring
+  labels:
+    helm.sh/chart: grafana-9.3.0
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "12.1.0"
+rules: []
+---
+# Source: grafana-stack/charts/grafana/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: grafana-stack
+  namespace: monitoring
+  labels:
+    helm.sh/chart: grafana-9.3.0
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "12.1.0"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: grafana-stack
+subjects:
+- kind: ServiceAccount
+  name: grafana-stack
+  namespace: monitoring
+---
+# Source: grafana-stack/charts/grafana-alloy/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-stack-grafana-alloy
+  namespace: monitoring
+  labels:
+    helm.sh/chart: grafana-alloy-1.2.0
+    app.kubernetes.io/name: grafana-alloy
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "v1.10.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: alloy
+    app.kubernetes.io/component: networking
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: grafana-alloy
+    app.kubernetes.io/instance: grafana-stack
+  internalTrafficPolicy: Cluster
+  ports:
+    - name: http-metrics
+      port: 12345
+      targetPort: 12345
+      protocol: "TCP"
+---
+# Source: grafana-stack/charts/grafana/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-stack
+  namespace: monitoring
+  labels:
+    helm.sh/chart: grafana-9.3.0
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "12.1.0"
+spec:
+  type: LoadBalancer
+  ports:
+    - name: service
+      port: 80
+      protocol: TCP
+      targetPort: 3000
+  selector:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+---
+# Source: grafana-stack/charts/grafana-alloy/templates/controllers/daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: grafana-stack-grafana-alloy
+  namespace: monitoring
+  labels:
+    helm.sh/chart: grafana-alloy-1.2.0
+    app.kubernetes.io/name: grafana-alloy
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "v1.10.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: alloy
+spec:
+  minReadySeconds: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: grafana-alloy
+      app.kubernetes.io/instance: grafana-stack
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: alloy
+      labels:
+        app.kubernetes.io/name: grafana-alloy
+        app.kubernetes.io/instance: grafana-stack
+    spec:
+      serviceAccountName: grafana-stack-grafana-alloy
+      containers:
+        - name: alloy
+          image: docker.io/grafana/alloy:v1.10.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - run
+            - /etc/alloy/config.alloy
+            - --storage.path=/tmp/alloy
+            - --server.http.listen-addr=0.0.0.0:12345
+            - --server.http.ui-path-prefix=/
+            - --stability.level=generally-available
+          env:
+            - name: ALLOY_DEPLOY_MODE
+              value: "helm"
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          ports:
+            - containerPort: 12345
+              name: http-metrics
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 12345
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+          volumeMounts:
+            - name: config
+              mountPath: /etc/alloy
+        - name: config-reloader
+          image: quay.io/prometheus-operator/prometheus-config-reloader:v0.81.0
+          args:
+            - --watched-dir=/etc/alloy
+            - --reload-url=http://localhost:12345/-/reload
+          volumeMounts:
+            - name: config
+              mountPath: /etc/alloy
+          resources:
+            requests:
+              cpu: 10m
+              memory: 50Mi
+      dnsPolicy: ClusterFirst
+      volumes:
+        - name: config
+          configMap:
+            name: grafana-stack-grafana-alloy
+---
+# Source: grafana-stack/charts/grafana/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-stack
+  namespace: monitoring
+  labels:
+    helm.sh/chart: grafana-9.3.0
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "12.1.0"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+      app.kubernetes.io/instance: grafana-stack
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: grafana-9.3.0
+        app.kubernetes.io/name: grafana
+        app.kubernetes.io/instance: grafana-stack
+        app.kubernetes.io/version: "12.1.0"
+      annotations:
+        checksum/config: 0e9cbd0ea8e24e32f7dfca5bab17a2ba05652642f0a09a4882833ae88e4cc4a3
+        checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
+        checksum/secret: b3948b26a85f604059577140f85ae7438b798e0b39574aa0817a95a2595dd2df
+        kubectl.kubernetes.io/default-container: grafana
+    spec:
+      
+      serviceAccountName: grafana-stack
+      automountServiceAccountToken: true
+      shareProcessNamespace: false
+      securityContext:
+        fsGroup: 472
+        runAsGroup: 472
+        runAsNonRoot: true
+        runAsUser: 472
+      enableServiceLinks: true
+      containers:
+        - name: grafana
+          image: "docker.io/grafana/grafana:12.1.0"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: config
+              mountPath: "/etc/grafana/grafana.ini"
+              subPath: grafana.ini
+            - name: storage
+              mountPath: "/var/lib/grafana"
+          ports:
+            - name: grafana
+              containerPort: 3000
+              protocol: TCP
+            - name: gossip-tcp
+              containerPort: 9094
+              protocol: TCP
+            - name: gossip-udp
+              containerPort: 9094
+              protocol: UDP
+            - name: profiling
+              containerPort: 6060
+              protocol: TCP
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: GF_SECURITY_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-stack
+                  key: admin-user
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-stack
+                  key: admin-password
+            - name: GF_PATHS_DATA
+              value: /var/lib/grafana/
+            - name: GF_PATHS_LOGS
+              value: /var/log/grafana
+            - name: GF_PATHS_PLUGINS
+              value: /var/lib/grafana/plugins
+            - name: GF_PATHS_PROVISIONING
+              value: /etc/grafana/provisioning
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 60
+            timeoutSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+      nodeSelector:
+        kubernetes.io/hostname: worker-1
+      volumes:
+        - name: config
+          configMap:
+            name: grafana-stack
+        - name: storage
+          emptyDir: {}
+---
+# Source: grafana-stack/charts/grafana/templates/tests/test-serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    helm.sh/chart: grafana-9.3.0
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "12.1.0"
+  name: grafana-stack-test
+  namespace: monitoring
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
+---
+# Source: grafana-stack/charts/grafana/templates/tests/test-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-stack-test
+  namespace: monitoring
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
+  labels:
+    helm.sh/chart: grafana-9.3.0
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "12.1.0"
+data:
+  run.sh: |-
+    @test "Test Health" {
+      url="http://grafana-stack/api/health"
+
+      code=$(wget --server-response --spider --timeout 90 --tries 10 ${url} 2>&1 | awk '/^  HTTP/{print $2}')
+      [ "$code" == "200" ]
+    }
+---
+# Source: grafana-stack/charts/grafana/templates/tests/test.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: grafana-stack-test
+  labels:
+    helm.sh/chart: grafana-9.3.0
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "12.1.0"
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
+  namespace: monitoring
+spec:
+  serviceAccountName: grafana-stack-test
+  nodeSelector:
+    kubernetes.io/hostname: worker-1
+  containers:
+    - name: grafana-stack-test
+      image: "docker.io/bats/bats:v1.4.1"
+      imagePullPolicy: "IfNotPresent"
+      command: ["/opt/bats/bin/bats", "-t", "/tests/run.sh"]
+      volumeMounts:
+        - mountPath: /tests
+          name: tests
+          readOnly: true
+  volumes:
+    - name: tests
+      configMap:
+        name: grafana-stack-test
+  restartPolicy: Never

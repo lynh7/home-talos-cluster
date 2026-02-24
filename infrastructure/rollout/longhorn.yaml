@@ -85,7 +85,6 @@ data:
   default-setting.yaml: |-
     priority-class: longhorn-critical
     disable-revision-counter: true
-    deleting-confirmation-flag: true
 ---
 # Source: longhorn/templates/storageclass.yaml
 apiVersion: v1
@@ -5177,8 +5176,6 @@ spec:
           secretName: longhorn-grpc-tls
           optional: true
       priorityClassName: "longhorn-critical"
-      nodeSelector:
-        kubernetes.io/hostname: worker-1
       serviceAccountName: longhorn-service-account
   updateStrategy:
     rollingUpdate:
@@ -5252,17 +5249,7 @@ spec:
             value: "longhornio/csi-snapshotter:v8.2.0"
           - name: CSI_LIVENESS_PROBE_IMAGE
             value: "longhornio/livenessprobe:v2.15.0"
-          - name: CSI_ATTACHER_REPLICA_COUNT
-            value: "1"
-          - name: CSI_PROVISIONER_REPLICA_COUNT
-            value: "1"
-          - name: CSI_RESIZER_REPLICA_COUNT
-            value: "1"
-          - name: CSI_SNAPSHOTTER_REPLICA_COUNT
-            value: "1"
       priorityClassName: "longhorn-critical"
-      nodeSelector:
-        kubernetes.io/hostname: worker-1
       serviceAccountName: longhorn-service-account
       securityContext:
         runAsUser: 0
@@ -5335,8 +5322,6 @@ spec:
       - emptyDir: {}
         name: var-run
       priorityClassName: "longhorn-critical"
-      nodeSelector:
-        kubernetes.io/hostname: worker-1
 ---
 # Source: longhorn/templates/validate-psp-install.yaml
 #
@@ -5384,8 +5369,6 @@ spec:
       restartPolicy: OnFailure
       priorityClassName: "longhorn-critical"
       serviceAccountName: longhorn-service-account
-      nodeSelector:
-        kubernetes.io/hostname: worker-1
 ---
 # Source: longhorn/templates/preupgrade-job.yaml
 apiVersion: batch/v1
@@ -5438,8 +5421,6 @@ spec:
           path: /proc/
       restartPolicy: OnFailure
       serviceAccountName: longhorn-service-account
-      nodeSelector:
-        kubernetes.io/hostname: worker-1
 ---
 # Source: longhorn/templates/uninstall-job.yaml
 apiVersion: batch/v1
@@ -5485,5 +5466,3 @@ spec:
       restartPolicy: Never
       priorityClassName: "longhorn-critical"
       serviceAccountName: longhorn-service-account
-      nodeSelector:
-        kubernetes.io/hostname: worker-1

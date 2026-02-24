@@ -1,0 +1,20 @@
+grafana: 
+  service:
+    type: LoadBalancer
+  nodeSelector:
+    kubernetes.io/hostname: worker-1
+grafana-alloy: 
+  alloy:
+    configMap:
+      create: true
+      content: |
+        {{ .Files.Get "alloy-config.hcl" | nindent 6 }}
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+  serviceMonitor:
+    enabled: false

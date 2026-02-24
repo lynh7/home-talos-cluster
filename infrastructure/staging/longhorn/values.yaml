@@ -1,19 +1,16 @@
-# global:
-#   nodeSelector: 
-#     kubernetes.io/hostname: worker-1
 longhornUI:
   replicas: 1
 csi:
   # -- Replica count of the CSI Attacher
-  attacherReplicaCount: 3
+  attacherReplicaCount: 1
   # -- Replica count of the CSI Provisioner
-  provisionerReplicaCount: 3
+  provisionerReplicaCount: 1
   # -- Replica count of the CSI Resizer
-  resizerReplicaCount: 3
+  resizerReplicaCount: 1
   # -- Replica count of the CSI Snapshotter
-  snapshotterReplicaCount: 3
-# defaultSettings:
-#   deletingConfirmationFlag: true
+  snapshotterReplicaCount: 1
+defaultSettings:
+  deletingConfirmationFlag: true
 
 #################################
 ##### Longhorn UI Service #######

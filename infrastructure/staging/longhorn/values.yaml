@@ -13,6 +13,12 @@ defaultSettings:
   deletingConfirmationFlag: true
 
 #################################
+#### Longhorn Uninstall Job #####
+#################################
+uninstallJob:
+  enabled: false
+
+#################################
 ##### Longhorn UI Service #######
 #################################
 service:

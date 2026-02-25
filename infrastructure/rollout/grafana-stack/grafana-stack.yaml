@@ -53,7 +53,7 @@ type: Opaque
 data:
   
   admin-user: "YWRtaW4="
-  admin-password: "OElTeWd1cEFyekc5M0RRbHpuaW51QXhJRldNT0tRQUFRN0s0aFhWVg=="
+  admin-password: "Q2tsZExHMTloMzFqVzJ0Qk1JdzJlSEJpbzRVMEFHVnhwM0lkaVJ6UA=="
   ldap-toml: ""
 ---
 # Source: grafana-stack/charts/grafana-alloy/templates/configmap.yaml
@@ -470,7 +470,7 @@ spec:
       annotations:
         checksum/config: 0e9cbd0ea8e24e32f7dfca5bab17a2ba05652642f0a09a4882833ae88e4cc4a3
         checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
-        checksum/secret: b3948b26a85f604059577140f85ae7438b798e0b39574aa0817a95a2595dd2df
+        checksum/secret: a9cf8bbf6e3f3279ca67270c99447aa65e019a92e4691f20c05ebc35f23095fb
         kubectl.kubernetes.io/default-container: grafana
     spec:
       
@@ -555,74 +555,3 @@ spec:
             name: grafana-stack
         - name: storage
           emptyDir: {}
----
-# Source: grafana-stack/charts/grafana/templates/tests/test-serviceaccount.yaml
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  labels:
-    helm.sh/chart: grafana-9.3.0
-    app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: grafana-stack
-    app.kubernetes.io/version: "12.1.0"
-  name: grafana-stack-test
-  namespace: monitoring
-  annotations:
-    "helm.sh/hook": test
-    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
----
-# Source: grafana-stack/charts/grafana/templates/tests/test-configmap.yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: grafana-stack-test
-  namespace: monitoring
-  annotations:
-    "helm.sh/hook": test
-    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
-  labels:
-    helm.sh/chart: grafana-9.3.0
-    app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: grafana-stack
-    app.kubernetes.io/version: "12.1.0"
-data:
-  run.sh: |-
-    @test "Test Health" {
-      url="http://grafana-stack/api/health"
-
-      code=$(wget --server-response --spider --timeout 90 --tries 10 ${url} 2>&1 | awk '/^  HTTP/{print $2}')
-      [ "$code" == "200" ]
-    }
----
-# Source: grafana-stack/charts/grafana/templates/tests/test.yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: grafana-stack-test
-  labels:
-    helm.sh/chart: grafana-9.3.0
-    app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: grafana-stack
-    app.kubernetes.io/version: "12.1.0"
-  annotations:
-    "helm.sh/hook": test
-    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
-  namespace: monitoring
-spec:
-  serviceAccountName: grafana-stack-test
-  nodeSelector:
-    kubernetes.io/hostname: worker-1
-  containers:
-    - name: grafana-stack-test
-      image: "docker.io/bats/bats:v1.4.1"
-      imagePullPolicy: "IfNotPresent"
-      command: ["/opt/bats/bin/bats", "-t", "/tests/run.sh"]
-      volumeMounts:
-        - mountPath: /tests
-          name: tests
-          readOnly: true
-  volumes:
-    - name: tests
-      configMap:
-        name: grafana-stack-test
-  restartPolicy: Never

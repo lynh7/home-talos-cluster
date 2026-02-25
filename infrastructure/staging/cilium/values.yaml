@@ -127,5 +127,4 @@ ciliumL2AnnouncementPolicy:
   name: "announce-lb"
   loadBalancerIPs: true
   interfaces:
-    - "ens18"
     - "ens19"

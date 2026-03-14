@@ -349,7 +349,7 @@ services:
       web:
         ipv4_address: 172.20.0.8  # Static IP on the bridge
     depends_on:
-      - traefik-v2
+      - traefik
     ports:
       - 9443:9443
     labels:

@@ -22,7 +22,7 @@ services:
   nginx-failover:
     image: nginx:alpine
     mem_limit: 15m
-    container_name: nginx-failover
+    container_name: default-page
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
@@ -51,7 +51,7 @@ services:
   
   cloudflare-ddns:
     image: favonia/cloudflare-ddns:latest
-    container_name: ddns-cloudflare
+    container_name: cloudflare-ddns
     restart: always
     # Restart the updater after reboot
     user: "1000:1000"
@@ -72,6 +72,8 @@ services:
       - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
       - DOMAINS=${DOMAINS}
       - PROXIED=true
+      - DETECTION_TIMEOUT=5s
+      - IP6_PROVIDER=none
   
   #NAS file browser Quantum
   filebrowser:
@@ -111,7 +113,7 @@ services:
 
       - "traefik.http.services.nas-https.loadbalancer.server.port=80"
 
-  traefik-v2:
+  traefik:
     image: traefik:v3.6
     mem_limit: 256m
     cpus: 0.5
@@ -269,7 +271,7 @@ services:
     labels:
       - traefik.enable=false
 
-  wg-easy:
+  wireguard-vpn:
     image: ghcr.io/wg-easy/wg-easy:14
     container_name: wireguard-vpn
     deploy:

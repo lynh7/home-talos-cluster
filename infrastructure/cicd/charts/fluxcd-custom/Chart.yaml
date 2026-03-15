@@ -1,0 +1,12 @@
+apiVersion: v2
+appVersion: 2.8.2
+description: A Helm chart for flux2, customized for our needs this will be used to deploy flux2 in our cluster with some custom configuration and dependencies.
+name: fluxcd-custom
+sources:
+- https://github.com/fluxcd-community/helm-charts
+dependencies:
+  - name: flux2
+    version: 2.18.1
+    repository: "file://./dependencies/flux2"
+type: application
+version: 1.0.0

@@ -1,0 +1,113 @@
+flux2:
+  installCRDs: true
+  crds:
+    # -- Add annotations to all CRD resources, e.g. "helm.sh/resource-policy": keep
+    annotations: {}
+
+  multitenancy:
+    # -- Implement the patches for Multi-tenancy lockdown.
+    # See https://fluxcd.io/docs/installation/#multi-tenancy-lockdown
+    enabled: false
+    # -- All Kustomizations and HelmReleases which don’t have spec.serviceAccountName
+    # specified, will use the default account from the tenant’s namespace.
+    # Tenants have to specify a service account in their Flux resources to be able
+    # to deploy workloads in their namespaces as the default account has no permissions.
+    defaultServiceAccount: "default"
+    # -- Both kustomize-controller and helm-controller service accounts run privileged
+    # with cluster-admin ClusterRoleBinding. Disable if you want to run them with a
+    # minimum set of permissions.
+    privileged: true
+
+  clusterDomain: cluster.local
+
+  cli:
+    image: ghcr.io/fluxcd/flux-cli
+    tag: v2.8.2
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    annotations: {}
+    serviceAccount:
+      automount: true
+
+  # controllers
+  helmController:
+    create: false
+
+  imageAutomationController:
+    create: false
+
+  imageReflectionController:
+    create: false
+
+  kustomizeController:
+    create: true
+
+  notificationController:
+    create: false
+
+  sourceController:
+    create: false
+
+  sourceWatcher:
+    create: false
+
+  policies:
+    create: true
+
+  rbac:
+    create: true
+    # -- Grant the Kubernetes view, edit and admin roles access to Flux custom resources
+    createAggregation: true
+    # -- Add annotations to all RBAC resources, e.g. "helm.sh/resource-policy": keep
+    annotations: {}
+    roleRef:
+      name: cluster-admin
+
+  logLevel: info
+  watchAllNamespaces: true
+
+  # -- contents of pod imagePullSecret in form 'name=[secretName]'; applied to all controllers
+  imagePullSecrets: []
+
+  # -- Array of extra K8s manifests to deploy
+  extraObjects: []
+  # Example usage from https://fluxcd.io/docs/components/source/buckets/#static-authentication
+  # - apiVersion: source.toolkit.fluxcd.io/v1beta2
+  #   kind: Bucket
+  #   metadata:
+  #     name: podinfo
+  #     namespace: default
+  #   spec:
+  #     interval: 1m
+  #     provider: generic
+  #     bucketName: podinfo
+  #     endpoint: minio.minio.svc.cluster.local:9000
+  #     insecure: true
+  #     secretRef:
+  #       name: minio-credentials
+  # - apiVersion: v1
+  #   kind: Secret
+  #   metadata:
+  #     name: minio-credentials
+  #     namespace: default
+  #   type: Opaque
+  #   data:
+  #     accesskey: <BASE64>
+  #     secretkey: <BASE64>
+
+  # Enables podMonitor creation for the Prometheus Operator
+  prometheus:
+    podMonitor:
+      # -- Enables podMonitor endpoint
+      create: false
+      podMetricsEndpoints:
+        - port: http-prom
+          relabelings:
+            # https://github.com/prometheus-operator/prometheus-operator/issues/4816
+            - sourceLabels: [__meta_kubernetes_pod_phase]
+              action: keep
+              regex: Running
+
+  distro:
+    openshift: false

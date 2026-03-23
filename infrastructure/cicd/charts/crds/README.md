@@ -1,1 +1,0 @@
-# This need to be deployed first, then fluxcd and the last-one fluxcd-custom

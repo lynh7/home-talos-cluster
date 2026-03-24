@@ -32,7 +32,7 @@ flux2:
 
   # controllers
   helmController:
-    create: false
+    create: true
 
   imageAutomationController:
     create: false
@@ -44,10 +44,10 @@ flux2:
     create: true
 
   notificationController:
-    create: false
+    create: true
 
   sourceController:
-    create: false
+    create: true
 
   sourceWatcher:
     create: false

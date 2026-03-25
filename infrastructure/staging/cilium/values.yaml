@@ -86,6 +86,11 @@ tls:
   secretsBackend: k8s
 operator:
   replicas: 1
+  tolerations:
+    - key: "monitoring"
+      operator: "Equal"
+      value: "critical"
+      effect: "NoSchedule"
 cgroup:
   autoMount:
     # -- Enable auto mount of cgroup2 filesystem.

@@ -1,0 +1,13 @@
+# gitrepository.yaml  ← safe to commit, no secrets here
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: flux-system
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  url: https://github.com/lynh7/home-talos-cluster
+  ref:
+    branch: main
+  secretRef:
+    name: github-pat-auth

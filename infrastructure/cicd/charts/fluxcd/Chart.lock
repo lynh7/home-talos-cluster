@@ -1,0 +1,6 @@
+dependencies:
+- name: flux2
+  repository: file://./dependencies/flux2
+  version: 2.18.1
+digest: sha256:26505cccc0e16b43939aadb9581680480f681d28ee5da5540555532ae798005c
+generated: "2026-03-23T21:33:24.450243217+07:00"

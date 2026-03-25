@@ -1,7 +1,7 @@
 {{- if .Values.ciliumLoadBalancerIPPools.enabled }}
 {{- range .Values.ciliumLoadBalancerIPPools.pools }}
 ---
-apiVersion: "cilium.io/v2"
+apiVersion: "cilium.io/v2alpha1"
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: {{ .name | quote }}

@@ -1656,7 +1656,10 @@ spec:
       nodeSelector:
         kubernetes.io/os: linux
       tolerations:
-        - operator: Exists
+        - effect: NoSchedule
+          key: monitoring
+          operator: Equal
+          value: critical
       volumes:
         # To read the configuration from the config map
       - name: cilium-config-path

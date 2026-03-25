@@ -1657,7 +1657,7 @@ spec:
         kubernetes.io/os: linux
       tolerations:
         - effect: NoSchedule
-          key: monitoring
+          key: critical-components
           operator: Equal
           value: critical
       volumes:

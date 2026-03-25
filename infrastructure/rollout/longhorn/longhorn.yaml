@@ -5177,6 +5177,11 @@ spec:
           secretName: longhorn-grpc-tls
           optional: true
       priorityClassName: "longhorn-critical"
+      tolerations:
+      - effect: NoSchedule
+        key: critical-components
+        operator: Equal
+        value: critical
       serviceAccountName: longhorn-service-account
   updateStrategy:
     rollingUpdate:
@@ -5331,6 +5336,11 @@ spec:
       - emptyDir: {}
         name: var-run
       priorityClassName: "longhorn-critical"
+      tolerations:
+      - effect: NoSchedule
+        key: critical-components
+        operator: Equal
+        value: critical
 ---
 # Source: longhorn/templates/validate-psp-install.yaml
 #
@@ -5378,6 +5388,11 @@ spec:
       restartPolicy: OnFailure
       priorityClassName: "longhorn-critical"
       serviceAccountName: longhorn-service-account
+      tolerations:
+      - effect: NoSchedule
+        key: critical-components
+        operator: Equal
+        value: critical
 ---
 # Source: longhorn/templates/preupgrade-job.yaml
 apiVersion: batch/v1
@@ -5430,3 +5445,8 @@ spec:
           path: /proc/
       restartPolicy: OnFailure
       serviceAccountName: longhorn-service-account
+      tolerations:
+      - effect: NoSchedule
+        key: critical-components
+        operator: Equal
+        value: critical

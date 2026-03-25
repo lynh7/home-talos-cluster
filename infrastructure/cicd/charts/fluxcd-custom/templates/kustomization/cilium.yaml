@@ -4,7 +4,7 @@ metadata:
   name: rollout-cilium
   namespace: flux-system
 spec:
-  interval: 2m
+  interval: 5m
   path: ./infrastructure/rollout/cilium
   prune: true
   sourceRef:

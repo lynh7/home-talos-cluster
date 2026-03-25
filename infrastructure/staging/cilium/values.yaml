@@ -87,7 +87,7 @@ tls:
 operator:
   replicas: 1
   tolerations:
-    - key: "monitoring"
+    - key: "critical-components"
       operator: "Equal"
       value: "critical"
       effect: "NoSchedule"

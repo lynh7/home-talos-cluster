@@ -5352,21 +5352,13 @@ spec:
 # Source: longhorn/templates/validate-psp-install.yaml
 #
 ---
-# Source: longhorn/templates/longhorn-customizations/setting.yaml
+# Source: longhorn/templates/longhorn-customizations/50-setting.yaml
 apiVersion: longhorn.io/v1beta2
 kind: Setting
 metadata:
   name: taint-toleration
   namespace: longhorn-system
-value: |
-  [
-    {
-      "key": "critical-components",
-      "value": "critical",
-      "operator": "Equal",
-      "effect": "NoSchedule"
-    }
-  ]
+value: "value: critical-components=critical:NoSchedule" # Workaround to schedule on master node
 ---
 # Source: longhorn/templates/postupgrade-job.yaml
 apiVersion: batch/v1

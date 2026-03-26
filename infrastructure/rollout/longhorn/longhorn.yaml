@@ -5362,7 +5362,8 @@ value: |
   [
     {
       "key": "critical-components",
-      "operator": "Exists",
+      "value": "critical",
+      "operator": "Equal",
       "effect": "NoSchedule"
     }
   ]

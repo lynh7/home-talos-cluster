@@ -5255,6 +5255,14 @@ spec:
             value: "longhornio/csi-snapshotter:v8.2.0"
           - name: CSI_LIVENESS_PROBE_IMAGE
             value: "longhornio/livenessprobe:v2.15.0"
+          - name: CSI_ATTACHER_REPLICA_COUNT
+            value: "1"
+          - name: CSI_PROVISIONER_REPLICA_COUNT
+            value: "1"
+          - name: CSI_RESIZER_REPLICA_COUNT
+            value: "1"
+          - name: CSI_SNAPSHOTTER_REPLICA_COUNT
+            value: "1"
       priorityClassName: "longhorn-critical"
       tolerations:
       - effect: NoSchedule
@@ -5343,6 +5351,21 @@ spec:
 ---
 # Source: longhorn/templates/validate-psp-install.yaml
 #
+---
+# Source: longhorn/templates/longhorn-customizations/setting.yaml
+apiVersion: longhorn.io/v1beta2
+kind: Setting
+metadata:
+  name: taint-toleration
+  namespace: longhorn-system
+value: |
+  [
+    {
+      "key": "critical-components",
+      "operator": "Exists",
+      "effect": "NoSchedule"
+    }
+  ]
 ---
 # Source: longhorn/templates/postupgrade-job.yaml
 apiVersion: batch/v1

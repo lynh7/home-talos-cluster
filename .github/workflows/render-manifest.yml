@@ -10,6 +10,12 @@ on:
     paths:
       - 'infrastructure/staging/**/values.yaml'
 
+  workflow_dispatch:
+    inputs:
+      chart:
+        description: "Chart name (optional)" 
+        required: false
+
 jobs:
   render:
     runs-on: ubuntu-latest

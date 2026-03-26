@@ -53,7 +53,7 @@ type: Opaque
 data:
   
   admin-user: "YWRtaW4="
-  admin-password: "Q2tsZExHMTloMzFqVzJ0Qk1JdzJlSEJpbzRVMEFHVnhwM0lkaVJ6UA=="
+  admin-password: "ek85dHZPTWpoYTRGV3Z6SXRDWnpoa3VNdEVvN3pmSFJiRXhvY3dnSA=="
   ldap-toml: ""
 ---
 # Source: grafana-stack/charts/grafana-alloy/templates/configmap.yaml
@@ -470,7 +470,7 @@ spec:
       annotations:
         checksum/config: 0e9cbd0ea8e24e32f7dfca5bab17a2ba05652642f0a09a4882833ae88e4cc4a3
         checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
-        checksum/secret: a9cf8bbf6e3f3279ca67270c99447aa65e019a92e4691f20c05ebc35f23095fb
+        checksum/secret: 9015b845e8425f1f8222e3a421be40c5bd5a52d4bcb8e11e51c4bd3739c4ee99
         kubectl.kubernetes.io/default-container: grafana
     spec:
       
@@ -548,7 +548,7 @@ spec:
               path: /api/health
               port: 3000
       nodeSelector:
-        kubernetes.io/hostname: worker-1
+        node-role.kubernetes.io/control-plane: ""
       volumes:
         - name: config
           configMap:

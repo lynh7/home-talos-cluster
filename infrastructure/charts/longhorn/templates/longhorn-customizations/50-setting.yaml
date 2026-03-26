@@ -1,8 +1,0 @@
-{{- if .Values.customizations.taintTolerationSetting.enabled }}
-apiVersion: longhorn.io/v1beta2
-kind: Setting
-metadata:
-  name: taint-toleration
-  namespace: longhorn-system
-value: "value: critical-components=critical:NoSchedule" # Workaround to schedule on master node
-{{- end }}

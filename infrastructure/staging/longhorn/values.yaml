@@ -32,3 +32,10 @@ uninstallJob:
 service:
   ui:
     type: LoadBalancer
+
+#################################
+#### Longhorn Customizations ####
+##################################
+customizations:
+  taintTolerationSetting:
+    enabled: true

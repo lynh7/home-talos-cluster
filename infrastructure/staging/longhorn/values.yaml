@@ -6,11 +6,8 @@ global:
       effect: "NoSchedule"
 longhornUI:
   replicas: 1
-  # tolerations:
-  #   - key: "critical-components"
-  #     operator: "Equal"
-  #     value: "critical"
-  #     effect: "NoSchedule"
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: "" #Always 
 csi:
   # -- Replica count of the CSI Attacher
   attacherReplicaCount: 1

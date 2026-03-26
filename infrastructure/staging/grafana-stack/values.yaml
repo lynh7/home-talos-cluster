@@ -2,7 +2,7 @@ grafana:
   service:
     type: LoadBalancer
   nodeSelector:
-    kubernetes.io/hostname: worker-1
+    node-role.kubernetes.io/control-plane: ""
 alloy: 
   alloy:
     configMap:
@@ -15,6 +15,7 @@ alloy:
       memory: 128Mi
     limits:
       memory: 256Mi
-
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""
   serviceMonitor:
     enabled: false

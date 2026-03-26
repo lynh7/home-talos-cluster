@@ -34,14 +34,29 @@ jobs:
           sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
           sudo chmod +x /usr/local/bin/yq
 
-      - name: Detect changed charts
+      - name: Detect changed charts (auto/manual)
         id: changed
         run: |
-          CHARTS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} \
-            | grep infrastructure/staging/ \
-            | cut -d/ -f3 \
-            | sort -u \
-            | tr '\n' ' ')
+          echo "Event: ${{ github.event_name }}"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ -n "${{ github.event.inputs.chart }}" ]; then
+              # Manual with specific chart
+              CHARTS="${{ github.event.inputs.chart }}"
+            else
+              # Manual with no input → render all charts
+              CHARTS=$(ls infrastructure/staging | tr '\n' ' ')
+            fi
+          else
+            # Push event → detect changed charts
+            CHARTS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} \
+              | grep infrastructure/staging/ \
+              | cut -d/ -f3 \
+              | sort -u \
+              | tr '\n' ' ')
+          fi
+
+          echo "Charts: $CHARTS"
           echo "charts=$CHARTS" >> $GITHUB_OUTPUT
 
       - name: Render Charts

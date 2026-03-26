@@ -1,8 +1,13 @@
 grafana: 
   service:
     type: LoadBalancer
+  tolerations:
+    - key: "critical-components"
+      operator: "Equal"
+      value: "critical"
+      effect: "NoSchedule"
   nodeSelector:
-    kubernetes.io/hostname: worker-1
+    node-role.kubernetes.io/control-plane: ""
 alloy: 
   alloy:
     configMap:
@@ -15,6 +20,12 @@ alloy:
       memory: 128Mi
     limits:
       memory: 256Mi
-
+  tolerations:
+    - key: "critical-components"
+      operator: "Equal"
+      value: "critical"
+      effect: "NoSchedule"
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""
   serviceMonitor:
     enabled: false

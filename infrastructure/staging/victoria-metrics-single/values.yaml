@@ -7,3 +7,10 @@ server:
       memory: 128Mi
     limits:
       memory: 256Mi
+  tolerations:
+    - key: "critical-components"
+      operator: "Equal"
+      value: "critical"
+      effect: "NoSchedule"
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""

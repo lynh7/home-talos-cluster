@@ -5346,6 +5346,8 @@ spec:
         key: critical-components
         operator: Equal
         value: critical
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
 ---
 # Source: longhorn/templates/validate-psp-install.yaml
 #

@@ -7,16 +7,16 @@ global:
 longhornUI:
   replicas: 1
   nodeSelector:
-    node-role.kubernetes.io/control-plane: "" #Always 
-csi:
-  # -- Replica count of the CSI Attacher
-  attacherReplicaCount: 1
-  # -- Replica count of the CSI Provisioner
-  provisionerReplicaCount: 1
-  # -- Replica count of the CSI Resizer
-  resizerReplicaCount: 1
-  # -- Replica count of the CSI Snapshotter
-  snapshotterReplicaCount: 1
+    node-role.kubernetes.io/control-plane: ""
+# csi:
+#   # -- Replica count of the CSI Attacher
+#   attacherReplicaCount: 1
+#   # -- Replica count of the CSI Provisioner
+#   provisionerReplicaCount: 1
+#   # -- Replica count of the CSI Resizer
+#   resizerReplicaCount: 1
+#   # -- Replica count of the CSI Snapshotter
+#   snapshotterReplicaCount: 1
 defaultSettings:
   deletingConfirmationFlag: true
 

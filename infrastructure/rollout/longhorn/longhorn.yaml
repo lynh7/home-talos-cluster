@@ -5264,6 +5264,11 @@ spec:
           - name: CSI_SNAPSHOTTER_REPLICA_COUNT
             value: "1"
       priorityClassName: "longhorn-critical"
+      tolerations:
+      - effect: NoSchedule
+        key: critical-components
+        operator: Equal
+        value: critical
       serviceAccountName: longhorn-service-account
       securityContext:
         runAsUser: 0

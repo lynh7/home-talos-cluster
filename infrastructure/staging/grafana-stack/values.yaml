@@ -1,6 +1,7 @@
 grafana:
   service:
     type: LoadBalancer
+  #-- Schedule Grafana to run on master node  
   tolerations:
     - key: "critical-components"
       operator: "Equal"
@@ -8,18 +9,12 @@ grafana:
       effect: "NoSchedule"
   nodeSelector:
     node-role.kubernetes.io/control-plane: ""
-alloy:
+grafana-alloy:
   alloy:
     configMap:
       create: true
       content: |
         {{ .Files.Get "alloy-config.hcl" | nindent 6 }}
-  resources:
-    requests:
-      cpu: 50m
-      memory: 128Mi
-    limits:
-      memory: 256Mi
   controller:
     type: 'deployment'
     tolerations:

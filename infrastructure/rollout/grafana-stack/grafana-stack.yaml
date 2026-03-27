@@ -53,7 +53,7 @@ type: Opaque
 data:
   
   admin-user: "YWRtaW4="
-  admin-password: "NTBCMWFVZTNDN005N3I3QWtCRmkwRE90Z0RIV0FHcGVZeml6Nldldg=="
+  admin-password: "dVdySDJNSVVwdTdBUWlzdHFkdGZ4NUdXQ0RqQURrQ1Z5T084bFo0Vw=="
   ldap-toml: ""
 ---
 # Source: grafana-stack/charts/grafana-alloy/templates/configmap.yaml
@@ -72,34 +72,21 @@ metadata:
     app.kubernetes.io/component: config
 data:
   config.alloy: |-
-    logging {
-    	level  = "info"
-    	format = "logfmt"
-    }
     
-    discovery.kubernetes "pods" {
-    	role = "pod"
-    }
-    
-    discovery.kubernetes "nodes" {
-    	role = "node"
-    }
-    
-    discovery.kubernetes "services" {
-    	role = "service"
-    }
-    
-    discovery.kubernetes "endpoints" {
-    	role = "endpoints"
-    }
-    
-    discovery.kubernetes "endpointslices" {
-    	role = "endpointslice"
-    }
-    
-    discovery.kubernetes "ingresses" {
-    	role = "ingress"
-    }
+          discovery.kubernetes "pods" {
+            role = "pod"
+          }
+          
+          prometheus.scrape "kubernetes" {
+            targets = discovery.kubernetes.pods.targets
+            forward_to = [prometheus.remote_write.vm.receiver]
+          }
+          
+          prometheus.remote_write "vm" {
+            endpoint {
+              url = "http://victoria-metrics-server.monitoring.svc.cluster.local:8428/api/v1/write"
+            }
+          }
 ---
 # Source: grafana-stack/charts/grafana/templates/configmap.yaml
 apiVersion: v1
@@ -363,9 +350,9 @@ spec:
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: grafana-stack
 ---
-# Source: grafana-stack/charts/grafana-alloy/templates/controllers/daemonset.yaml
+# Source: grafana-stack/charts/grafana-alloy/templates/controllers/deployment.yaml
 apiVersion: apps/v1
-kind: DaemonSet
+kind: Deployment
 metadata:
   name: grafana-stack-grafana-alloy
   namespace: monitoring
@@ -377,6 +364,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: alloy
 spec:
+  replicas: 1
   minReadySeconds: 10
   selector:
     matchLabels:
@@ -386,6 +374,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: alloy
+        checksum/config: fd604e17f452620fd3d999545560237258df0f35316b053a73d79a5427072d3
       labels:
         app.kubernetes.io/name: grafana-alloy
         app.kubernetes.io/instance: grafana-stack
@@ -435,6 +424,11 @@ spec:
               cpu: 10m
               memory: 50Mi
       dnsPolicy: ClusterFirst
+      tolerations:
+        - effect: NoSchedule
+          key: critical-components
+          operator: Equal
+          value: critical
       volumes:
         - name: config
           configMap:
@@ -470,7 +464,7 @@ spec:
       annotations:
         checksum/config: 0e9cbd0ea8e24e32f7dfca5bab17a2ba05652642f0a09a4882833ae88e4cc4a3
         checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
-        checksum/secret: 318eefe27c5ccde31d2400119b543665c9db3673ea243169a3b6c2c8a9ce30f5
+        checksum/secret: 2c85680e739c49a8be3bc412560f396c67664b5efcf7d9ba8c29cea786bcd5ee
         kubectl.kubernetes.io/default-container: grafana
     spec:
       

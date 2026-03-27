@@ -1,1 +1,2 @@
 infrastructure/cicd/charts/fluxcd/.env
+infrastructure/staging/grafana-stack/.env

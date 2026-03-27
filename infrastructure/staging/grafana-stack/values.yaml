@@ -1,4 +1,4 @@
-grafana: 
+grafana:
   service:
     type: LoadBalancer
   tolerations:
@@ -8,7 +8,7 @@ grafana:
       effect: "NoSchedule"
   nodeSelector:
     node-role.kubernetes.io/control-plane: ""
-alloy: 
+alloy:
   alloy:
     configMap:
       create: true
@@ -21,6 +21,7 @@ alloy:
     limits:
       memory: 256Mi
   controller:
+    type: 'deployment'
     tolerations:
       - key: "critical-components"
         operator: "Equal"

@@ -17,6 +17,11 @@ csi:
   resizerReplicaCount: 1
   # -- Replica count of the CSI Snapshotter
   snapshotterReplicaCount: 1
+
+persistence:
+  # -- replica of PV -- as homelab, we can set it to 1
+    defaultClassReplicaCount: 1
+
 defaultSettings:
   deletingConfirmationFlag: true
 

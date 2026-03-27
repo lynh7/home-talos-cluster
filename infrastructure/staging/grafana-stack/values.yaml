@@ -1,3 +1,6 @@
+######################################
+####### Grafana Stack Config #########
+######################################
 grafana:
   service:
     type: LoadBalancer
@@ -9,6 +12,10 @@ grafana:
       effect: "NoSchedule"
   nodeSelector:
     node-role.kubernetes.io/control-plane: ""
+
+#################################
+#### Grafana Alloy Config #####
+#################################
 grafana-alloy:
   alloy:
     configMap:

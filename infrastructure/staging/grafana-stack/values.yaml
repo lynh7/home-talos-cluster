@@ -36,7 +36,7 @@ grafana-alloy:
 
         // --- Relabel: keep only annotated targets ---
         discovery.relabel "k8s_metrics" {
-          targets = concat(
+          targets = array.concat(
             discovery.kubernetes.pods.targets,
             discovery.kubernetes.services.targets,
           )
@@ -68,7 +68,7 @@ grafana-alloy:
 
         // --- Scrape ---
         prometheus.scrape "k8s" {
-          targets         = discovery.relabel.k8s_metrics.targets
+          targets         = discovery.relabel.k8s_metrics.output
           forward_to      = [prometheus.remote_write.vm.receiver]
           scrape_interval = "30s"
         }

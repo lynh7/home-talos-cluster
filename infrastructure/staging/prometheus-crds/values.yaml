@@ -1,0 +1,1 @@
+# This chart is used to install the Prometheus CRDs. It does not contain any templates, as the CRDs are applied directly using kubectl apply -f.

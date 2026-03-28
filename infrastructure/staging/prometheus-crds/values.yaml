@@ -1,1 +1,50 @@
 # This chart is used to install the Prometheus CRDs. It does not contain any templates, as the CRDs are applied directly using kubectl apply -f.
+
+alertmanagerconfigs:
+  ## enabled defines if the CRD should be installed
+  enabled: false
+
+## alertmanagers configures the AlertManager CRD
+alertmanagers:
+  ## enabled defines if the CRD should be installed
+  enabled: false
+
+## podmonitors configures the PodMonitor CRD
+podmonitors:
+  ## enabled defines if the CRD should be installed
+  enabled: true
+
+## probes configures the Probe CRD
+probes:
+  ## enabled defines if the CRD should be installed
+  enabled: true
+
+## prometheusagents configures the PrometheusAgent CRD
+prometheusagents:
+  ## enabled defines if the CRD should be installed
+  enabled: false
+
+## prometheuses configures the Prometheus CRD
+prometheuses:
+  ## enabled defines if the CRD should be installed
+  enabled: true
+
+## prometheusrules configures the PrometheusRule CRD
+prometheusrules:
+  ## enabled defines if the CRD should be installed
+  enabled: true
+
+## scrapeconfigs configures the ScrapeConfig CRD
+scrapeconfigs:
+  ## enabled defines if the CRD should be installed
+  enabled: true
+
+## servicemonitors configures the ServiceMonitor CRD
+servicemonitors:
+  ## enabled defines if the CRD should be installed
+  enabled: true
+
+## thanosrulers configures the ThanosRuler CRD
+thanosrulers:
+  ## enabled defines if the CRD should be installed
+  enabled: false

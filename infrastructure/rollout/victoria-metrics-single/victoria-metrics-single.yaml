@@ -135,3 +135,28 @@ spec:
         resources:
           requests:
             storage: 16Gi
+---
+# Source: victoria-metrics-single/templates/monitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels: 
+    app: server
+    app.kubernetes.io/instance: victoria-metrics-single
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: victoria-metrics-single
+    app.kubernetes.io/version: v1.120.0
+    helm.sh/chart: victoria-metrics-single-0.22.0
+  name: victoria-metrics-single-server
+spec:
+  namespaceSelector:
+    matchNames:
+      - monitoring
+  selector:
+    matchLabels: 
+      app: server
+      app.kubernetes.io/instance: victoria-metrics-single
+      app.kubernetes.io/name: victoria-metrics-single 
+  endpoints:
+    - port: http
+      targetPort: http

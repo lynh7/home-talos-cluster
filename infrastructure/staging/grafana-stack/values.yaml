@@ -21,7 +21,72 @@ grafana-alloy:
     configMap:
       create: true
       content: |
-        {{ .Files.Get "alloy-config.hcl" | nindent 6 }}
+            logging {
+              level = "info"
+            }
+
+            #
+            # --- Kubernetes discovery ---
+            #
+            discovery.kubernetes "pods" {
+              role = "pod"
+            }
+
+            discovery.kubernetes "services" {
+              role = "service"
+            }
+
+            #
+            # --- Relabel: keep only annotated targets ---
+            #
+            discovery.relabel "k8s_metrics" {
+              targets = concat(
+                discovery.kubernetes.pods.targets,
+                discovery.kubernetes.services.targets,
+              )
+
+              rule {
+                source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_scrape"]
+                regex         = "true"
+                action        = "keep"
+              }
+
+              rule {
+                source_labels = ["__meta_kubernetes_service_annotation_prometheus_io_scrape"]
+                regex         = "true"
+                action        = "keep"
+              }
+
+              rule {
+                source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_path"]
+                target_label  = "__metrics_path__"
+              }
+
+              rule {
+                source_labels = ["__address__", "__meta_kubernetes_pod_annotation_prometheus_io_port"]
+                regex         = "([^:]+)(?::\\d+)?;(\\d+)"
+                replacement   = "$1:$2"
+                target_label  = "__address__"
+              }
+            }
+
+            #
+            # --- Scrape ---
+            #
+            prometheus.scrape "k8s" {
+              targets    = discovery.relabel.k8s_metrics.targets
+              forward_to = [prometheus.remote_write.vm.receiver]
+              scrape_interval = "30s"
+            }
+
+            #
+            # --- Remote write to VictoriaMetrics ---
+            #
+            prometheus.remote_write "vm" {
+              endpoint {
+                url = "http://victoria-metrics-single.monitoring:8428/api/v1/write"
+              }
+            }
   controller:
     type: 'deployment'
     tolerations:
@@ -29,5 +94,8 @@ grafana-alloy:
         operator: "Equal"
         value: "critical"
         effect: "NoSchedule"
+  service:
+    enabled: true
+    type: LoadBalancer
   serviceMonitor:
     enabled: false

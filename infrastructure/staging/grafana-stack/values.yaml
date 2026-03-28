@@ -23,6 +23,7 @@ grafana-alloy:
       content: |
         {{ .Files.Get "alloy-config.hcl" | nindent 6 }}
   controller:
+    type: 'deployment'
     tolerations:
       - key: "critical-components"
         operator: "Equal"

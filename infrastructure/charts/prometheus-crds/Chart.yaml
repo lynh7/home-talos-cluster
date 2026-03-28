@@ -1,0 +1,6 @@
+apiVersion: v2
+name: prometheus-crds
+description: A chart providing the Prometheus Custom Resource Definitions (CRDs).
+type: application
+appVersion: "0.1.0"
+version: 0.1.0

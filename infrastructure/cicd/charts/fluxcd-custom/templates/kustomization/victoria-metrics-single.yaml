@@ -7,6 +7,7 @@ spec:
   interval: 2m
   path: ./infrastructure/rollout/victoria-metrics-single
   prune: true
+  targetNamespace: monitoring
   sourceRef:
     kind: GitRepository
     name: flux-system

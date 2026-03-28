@@ -58,9 +58,7 @@ data:
       level = "info"
     }
     
-    #
-    # --- Kubernetes discovery ---
-    #
+    // --- Kubernetes discovery ---
     discovery.kubernetes "pods" {
       role = "pod"
     }
@@ -69,9 +67,7 @@ data:
       role = "service"
     }
     
-    #
-    # --- Relabel: keep only annotated targets ---
-    #
+    // --- Relabel: keep only annotated targets ---
     discovery.relabel "k8s_metrics" {
       targets = concat(
         discovery.kubernetes.pods.targets,
@@ -103,18 +99,14 @@ data:
       }
     }
     
-    #
-    # --- Scrape ---
-    #
+    // --- Scrape ---
     prometheus.scrape "k8s" {
-      targets    = discovery.relabel.k8s_metrics.targets
-      forward_to = [prometheus.remote_write.vm.receiver]
+      targets         = discovery.relabel.k8s_metrics.targets
+      forward_to      = [prometheus.remote_write.vm.receiver]
       scrape_interval = "30s"
     }
     
-    #
-    # --- Remote write to VictoriaMetrics ---
-    #
+    // --- Remote write to VictoriaMetrics ---
     prometheus.remote_write "vm" {
       endpoint {
         url = "http://victoria-metrics-single.monitoring:8428/api/v1/write"
@@ -407,7 +399,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: alloy
-        checksum/config: e08ea5492d9e6a532ede31cca3042706ee371aed34e30614a55f96055370486
+        checksum/config: b55b054a2bef0fab8329edc127996fae57758f01c36335c0f7ffaa46380e79d
       labels:
         app.kubernetes.io/name: grafana-alloy
         app.kubernetes.io/instance: grafana-stack

@@ -31154,8 +31154,6 @@ metadata:
     app.kubernetes.io/instance: prometheus-stack
     app.kubernetes.io/version: "1.10.2"
   annotations:
-    prometheus.io/path: /metrics
-    prometheus.io/port: "9100"
     prometheus.io/scrape: "true"
 spec:
   type: ClusterIP
@@ -31315,3 +31313,31 @@ spec:
 ---
 # Source: prometheus-stack/charts/prometheus-crds/templates/crd-servicemonitors.yaml
 # https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.90.1/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+---
+# Source: prometheus-stack/charts/node-exporter/templates/servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: prometheus-stack-node-exporter
+  namespace: monitoring
+  labels:
+    helm.sh/chart: node-exporter-4.52.2
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: metrics
+    app.kubernetes.io/part-of: node-exporter
+    app.kubernetes.io/name: node-exporter
+    app.kubernetes.io/instance: prometheus-stack
+    app.kubernetes.io/version: "1.10.2"
+spec:
+  jobLabel: app.kubernetes.io/name
+  
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: node-exporter
+      app.kubernetes.io/instance: prometheus-stack
+  attachMetadata:
+    node: false
+  endpoints:
+    - port: metrics
+      scheme: http
+      scrapeTimeout: 10s

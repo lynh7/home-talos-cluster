@@ -61,8 +61,6 @@ node-exporter:
     operator: "Equal"
     value: "critical"
     effect: "NoSchedule"
-  service:
-    annotations:
-      prometheus.io/scrape: "true"
-      prometheus.io/port: "9100"
-      prometheus.io/path: "/metrics"
+  prometheus:
+    monitor:
+      enabled: true

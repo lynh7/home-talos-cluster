@@ -1,11 +1,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: rollout-prometheus-crds
+  name: rollout-prometheus-stack
   namespace: flux-system
 spec:
   interval: 2m
-  path: ./infrastructure/rollout/prometheus-crds
+  path: ./infrastructure/rollout/prometheus-stack
   prune: true
   sourceRef:
     kind: GitRepository

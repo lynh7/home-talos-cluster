@@ -26,174 +26,73 @@ grafana-alloy:
         }
 
         // ─────────────────────────────────────────────────────────
-        // COMPONENT 1: Kubernetes Pod Discovery
-        // Watches all pods across all namespaces via the K8s API.
-        // Requires the RBAC ClusterRole we created earlier.
+        // ServiceMonitor-based discovery
+        // Alloy watches all ServiceMonitor CRDs cluster-wide
+        // and auto-configures scrape jobs from them.
         // ─────────────────────────────────────────────────────────
-        discovery.kubernetes "pods" {
+        prometheus.operator.servicemonitors "default" {
+          forward_to = [prometheus.remote_write.victoria.receiver]
+        }
+
+        // ─────────────────────────────────────────────────────────
+        // Node Exporter
+        // ─────────────────────────────────────────────────────────
+        discovery.kubernetes "node_exporter" {
           role = "pod"
 
-          // Optionally restrict to specific namespaces:
-          // namespaces { names = ["default", "my-app"] }
+          namespaces {
+            names = ["monitoring"]
+          }
         }
 
-        // ─────────────────────────────────────────────────────────
-        // COMPONENT 2: Kubernetes Service Discovery (optional)
-        // Also discover via Service annotations (not just Pods).
-        // ─────────────────────────────────────────────────────────
-        discovery.kubernetes "services" {
-          role = "endpoints"  // "endpoints" gives Pod IPs behind the Service
-        }
+        discovery.relabel "node_exporter" {
+          targets = discovery.kubernetes.node_exporter.targets
 
-        // ─────────────────────────────────────────────────────────
-        // COMPONENT 3: Relabeling for Pods
-        // This is where annotation-based filtering happens.
-        // Only pods with prometheus.io/scrape="true" pass through.
-        // ─────────────────────────────────────────────────────────
-        discovery.relabel "annotated_pods" {
-          targets = discovery.kubernetes.pods.targets
-
-          // RULE 1: DROP pods without scrape annotation
           rule {
-            source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_scrape"]
+            source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
             action        = "keep"
-            regex         = "true"
+            regex         = "prometheus-node-exporter"
           }
 
-          // RULE 2: Override scrape path from annotation (default: /metrics)
           rule {
-            source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_path"]
+            source_labels = ["__address__"]
             action        = "replace"
-            target_label  = "__metrics_path__"
-            regex         = "(.+)"
+            regex         = "([^:]+)(?::\\d+)?"
+            replacement   = "$1:9100"
+            target_label  = "__address__"
           }
 
-          // RULE 3: Override port from annotation
-          rule {
-            source_labels = [
-              "__address__",
-              "__meta_kubernetes_pod_annotation_prometheus_io_port",
-            ]
-            action       = "replace"
-            regex        = "([^:]+)(?::\\d+)?;(\\d+)"
-            replacement  = "$1:$2"
-            target_label = "__address__"
-          }
-
-          // RULE 4: Override scheme (http/https) from annotation
-          rule {
-            source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_scheme"]
-            action        = "replace"
-            target_label  = "__scheme__"
-            regex         = "(https?)"
-          }
-
-          // RULE 5: Add pod name as label
-          rule {
-            source_labels = ["__meta_kubernetes_pod_name"]
-            target_label  = "pod"
-          }
-
-          // RULE 6: Add namespace as label
-          rule {
-            source_labels = ["__meta_kubernetes_namespace"]
-            target_label  = "namespace"
-          }
-
-          // RULE 7: Add node name as label
           rule {
             source_labels = ["__meta_kubernetes_pod_node_name"]
             target_label  = "node"
           }
-
-          // RULE 8: Preserve app label from pod labels
-          rule {
-            source_labels = ["__meta_kubernetes_pod_label_app"]
-            target_label  = "app"
-          }
         }
 
-        // ─────────────────────────────────────────────────────────
-        // COMPONENT 4: Scrape annotated pods
-        // Connects to the filtered targets and pulls metrics.
-        // ─────────────────────────────────────────────────────────
-        prometheus.scrape "annotated_pods" {
-          targets         = discovery.relabel.annotated_pods.output
+        prometheus.scrape "node_exporter" {
+          targets         = discovery.relabel.node_exporter.output
           forward_to      = [prometheus.remote_write.victoria.receiver]
           scrape_interval = "30s"
-          scrape_timeout  = "10s"
-
-          // Honor labels defined in the target (e.g., custom labels from annotations)
-          honor_labels = true
         }
 
         // ─────────────────────────────────────────────────────────
-        // COMPONENT 5 (BONUS): Scrape Kubernetes node metrics
-        // Pulls kubelet and cAdvisor metrics from every node.
-        // ─────────────────────────────────────────────────────────
-        discovery.kubernetes "nodes" {
-          role = "node"
-        }
-
-        discovery.relabel "node_metrics" {
-          targets = discovery.kubernetes.nodes.targets
-
-          rule {
-            action       = "replace"
-            replacement  = "kubernetes.default.svc:443"
-            target_label = "__address__"
-          }
-          rule {
-            source_labels = ["__meta_kubernetes_node_name"]
-            regex         = "(.+)"
-            replacement   = "/api/v1/nodes/$1/proxy/metrics/cadvisor"
-            target_label  = "__metrics_path__"
-          }
-          rule {
-            source_labels = ["__meta_kubernetes_node_name"]
-            target_label  = "node"
-          }
-        }
-
-        prometheus.scrape "nodes" {
-          targets    = discovery.relabel.node_metrics.output
-          forward_to = [prometheus.remote_write.victoria.receiver]
-
-          // Use in-cluster TLS with the ServiceAccount token
-          bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-          tls_config {
-            ca_file              = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-            insecure_skip_verify = false
-          }
-        }
-
-        // ─────────────────────────────────────────────────────────
-        // COMPONENT 6: Remote Write to VictoriaMetrics
-        // Sends all scraped metrics via Prometheus remote_write.
+        // Remote Write to VictoriaMetrics
         // ─────────────────────────────────────────────────────────
         prometheus.remote_write "victoria" {
           endpoint {
             url = "http://victoria-metrics-single-server.monitoring.svc.cluster.local:8428/api/v1/write"
 
-            // Tuning: increase queue for high-volume environments
             queue_config {
               max_samples_per_send = 2000
               max_shards           = 30
               capacity             = 10000
             }
-
-            // Retry on failure
-            metadata_config {
-              send          = true
-              send_interval = "1m"
-            }
           }
 
-          // Add a global label to all metrics (useful for multi-cluster setups)
           external_labels = {
             cluster = "production",
           }
         }
+        
   controller:
     type: 'deployment'
     tolerations:

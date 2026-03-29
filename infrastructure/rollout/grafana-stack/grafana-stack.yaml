@@ -68,46 +68,6 @@ data:
     }
     
     // ─────────────────────────────────────────────────────────
-    // Node Exporter
-    // ─────────────────────────────────────────────────────────
-    discovery.kubernetes "node_exporter" {
-      role = "pod"
-    
-      namespaces {
-        names = ["monitoring"]
-      }
-    }
-    
-    discovery.relabel "node_exporter" {
-      targets = discovery.kubernetes.node_exporter.targets
-    
-      rule {
-        source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
-        action        = "keep"
-        regex         = "prometheus-node-exporter"
-      }
-    
-      rule {
-        source_labels = ["__address__"]
-        action        = "replace"
-        regex         = "([^:]+)(?::\\d+)?"
-        replacement   = "$1:9100"
-        target_label  = "__address__"
-      }
-    
-      rule {
-        source_labels = ["__meta_kubernetes_pod_node_name"]
-        target_label  = "node"
-      }
-    }
-    
-    prometheus.scrape "node_exporter" {
-      targets         = discovery.relabel.node_exporter.output
-      forward_to      = [prometheus.remote_write.victoria.receiver]
-      scrape_interval = "30s"
-    }
-    
-    // ─────────────────────────────────────────────────────────
     // Remote Write to VictoriaMetrics
     // ─────────────────────────────────────────────────────────
     prometheus.remote_write "victoria" {
@@ -122,7 +82,7 @@ data:
       }
     
       external_labels = {
-        cluster = "production",
+        cluster = "homelab-staging",
       }
     }
 ---
@@ -412,7 +372,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: alloy
-        checksum/config: 26de0a74ac635dad84312a771208034716a5352f2f7feacb57f0db64224b843
+        checksum/config: ef829d3f638f0ffa06de9138dff27accc9862151249a699e5fa8d00d9be7800
       labels:
         app.kubernetes.io/name: grafana-alloy
         app.kubernetes.io/instance: grafana-stack

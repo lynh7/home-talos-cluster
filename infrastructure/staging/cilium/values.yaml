@@ -92,12 +92,12 @@ prometheus:
     enabled: true
 envoy:
   prometheus:
-  enabled: true
-  port: 9962
-  serviceMonitor:
-    # -- Enable service monitors.
-    # This requires the prometheus CRDs to be available (see https://github.com/prometheus-operator/prometheus-operator/blob/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml)
     enabled: true
+    port: 9962
+    serviceMonitor:
+      # -- Enable service monitors.
+      # This requires the prometheus CRDs to be available (see https://github.com/prometheus-operator/prometheus-operator/blob/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml)
+      enabled: true
 operator:
   replicas: 1
   tolerations:
@@ -106,12 +106,12 @@ operator:
       value: "critical"
       effect: "NoSchedule"
   prometheus:
-  enabled: true
-  port: 9962
-  serviceMonitor:
+    enabled: true
+    port: 9962
+    serviceMonitor:
     # -- Enable service monitors.
     # This requires the prometheus CRDs to be available (see https://github.com/prometheus-operator/prometheus-operator/blob/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml)
-    enabled: true
+      enabled: true
 cgroup:
   autoMount:
     # -- Enable auto mount of cgroup2 filesystem.

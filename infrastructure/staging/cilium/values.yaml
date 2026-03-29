@@ -89,6 +89,7 @@ prometheus:
     # -- Enable service monitors.
     # This requires the prometheus CRDs to be available (see https://github.com/prometheus-operator/prometheus-operator/blob/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml)
     enabled: true
+    trustCRDsExist: true
 envoy:
   prometheus:
     enabled: true

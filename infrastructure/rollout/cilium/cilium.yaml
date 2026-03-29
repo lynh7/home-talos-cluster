@@ -67,6 +67,19 @@ data:
   # https://docs.cilium.io/en/latest/security/policy/intro/#policy-enforcement-modes
   enable-policy: "default"
   policy-cidr-match-mode: ""
+  # If you want metrics enabled in all of your Cilium agents, set the port for
+  # which the Cilium agents will have their metrics exposed.
+  # This option deprecates the "prometheus-serve-addr" in the
+  # "cilium-metrics-config" ConfigMap
+  # NOTE that this will open the port on ALL nodes where Cilium pods are
+  # scheduled.
+  prometheus-serve-addr: ":9962"
+  # A space-separated list of controller groups for which to enable metrics.
+  # The special values of "all" and "none" are supported.
+  controller-group-metrics:
+    write-cni-file
+    sync-host-ips
+    sync-lb-maps-with-k8s-services
   # If you want metrics enabled in cilium-operator, set the port for
   # which the Cilium Operator will have their metrics exposed.
   # NOTE that this will open the port on the nodes where Cilium operator pod
@@ -830,15 +843,33 @@ subjects:
   name: "cilium"
   namespace: kube-system
 ---
+# Source: cilium/templates/cilium-agent/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: cilium-agent
+  namespace: kube-system
+  labels:
+    k8s-app: cilium
+    app.kubernetes.io/name: cilium-agent
+    app.kubernetes.io/part-of: cilium
+spec:
+  clusterIP: None
+  type: ClusterIP
+  selector:
+    k8s-app: cilium
+  ports:
+  - name: metrics
+    port: 9962
+    protocol: TCP
+    targetPort: prometheus
+---
 # Source: cilium/templates/cilium-envoy/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
   name: cilium-envoy
   namespace: kube-system
-  annotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "9964"
   labels:
     k8s-app: cilium-envoy
     app.kubernetes.io/name: cilium-envoy
@@ -854,6 +885,29 @@ spec:
     port: 9964
     protocol: TCP
     targetPort: envoy-metrics
+---
+# Source: cilium/templates/cilium-operator/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: cilium-operator
+  namespace: kube-system
+  labels:
+    io.cilium/app: operator
+    name: cilium-operator
+    app.kubernetes.io/part-of: cilium
+    app.kubernetes.io/name: cilium-operator
+spec:
+  clusterIP: None
+  type: ClusterIP
+  ports:
+  - name: metrics
+    port: 9963
+    protocol: TCP
+    targetPort: prometheus
+  selector:
+    io.cilium/app: operator
+    name: cilium-operator
 ---
 # Source: cilium/templates/hubble-relay/service.yaml
 kind: Service
@@ -1043,6 +1097,15 @@ spec:
             exec:
               command:
               - /cni-uninstall.sh
+        ports:
+        - name: peer-service
+          containerPort: 4244
+          hostPort: 4244
+          protocol: TCP
+        - name: prometheus
+          containerPort: 9962
+          hostPort: 9962
+          protocol: TCP
         securityContext:
           seLinuxOptions:
             level: s0
@@ -1572,8 +1635,6 @@ spec:
   template:
     metadata:
       annotations:
-        prometheus.io/port: "9963"
-        prometheus.io/scrape: "true"
       labels:
         io.cilium/app: operator
         name: cilium-operator
@@ -1764,7 +1825,6 @@ spec:
                 k8s-app: cilium
             topologyKey: kubernetes.io/hostname
       nodeSelector:
-        kubernetes.io/hostname: worker-1
         kubernetes.io/os: linux
       volumes:
       - name: config
@@ -1844,7 +1904,6 @@ spec:
         volumeMounts:
         terminationMessagePolicy: FallbackToLogsOnError
       nodeSelector:
-        kubernetes.io/hostname: worker-1
         kubernetes.io/os: linux
       volumes:
       - configMap:
@@ -1874,3 +1933,94 @@ spec:
   blocks:
   -
     cidr: "192.168.100.0/26"
+---
+# Source: cilium/templates/cilium-agent/servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cilium-agent
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/part-of: cilium
+spec:
+  selector:
+    matchLabels:
+      k8s-app: cilium
+  namespaceSelector:
+    matchNames:
+    - kube-system
+  endpoints:
+  - port: metrics
+    interval: "10s"
+    honorLabels: true
+    path: /metrics
+    relabelings:
+    - replacement: ${1}
+      sourceLabels:
+      - __meta_kubernetes_pod_node_name
+      targetLabel: node
+  - port: envoy-metrics
+    interval: "10s"
+    honorLabels: true
+    path: /metrics
+    relabelings:
+    - replacement: ${1}
+      sourceLabels:
+      - __meta_kubernetes_pod_node_name
+      targetLabel: node
+  targetLabels:
+  - k8s-app
+---
+# Source: cilium/templates/cilium-envoy/servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cilium-envoy
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/part-of: cilium
+    app.kubernetes.io/name: cilium-envoy
+spec:
+  selector:
+    matchLabels:
+      k8s-app: cilium-envoy
+  namespaceSelector:
+    matchNames:
+    - kube-system
+  endpoints:
+  - port: envoy-metrics
+    interval: "10s"
+    honorLabels: true
+    path: /metrics
+    relabelings:
+    - replacement: ${1}
+      sourceLabels:
+      - __meta_kubernetes_pod_node_name
+      targetLabel: node
+  targetLabels:
+  - k8s-app
+---
+# Source: cilium/templates/cilium-operator/servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cilium-operator
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/part-of: cilium
+    app.kubernetes.io/name: cilium-operator
+spec:
+  selector:
+    matchLabels:
+      io.cilium/app: operator
+      name: cilium-operator
+  namespaceSelector:
+    matchNames:
+    - kube-system
+  endpoints:
+  - port: metrics
+    interval: "10s"
+    honorLabels: true
+    path: /metrics
+  targetLabels:
+  - io.cilium/app

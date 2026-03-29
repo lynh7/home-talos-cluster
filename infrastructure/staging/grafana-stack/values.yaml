@@ -173,7 +173,7 @@ grafana-alloy:
         // ─────────────────────────────────────────────────────────
         prometheus.remote_write "victoria" {
           endpoint {
-            url = "http://victoria-metrics-victoria-metrics-single-server.victoria-metrics.svc.cluster.local:8428/api/v1/write"
+            url = "http://victoria-metrics-single-server.monitoring.svc.cluster.local:8428/api/v1/write"
 
             // Tuning: increase queue for high-volume environments
             queue_config {

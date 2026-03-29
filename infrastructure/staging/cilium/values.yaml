@@ -64,12 +64,11 @@ l2announcements:
 hubble:
   relay:
     enabled: true
-    nodeSelector: 
-      kubernetes.io/hostname: worker-1
+  metrics:
+    serviceMonitor:
+      enabled: true
   ui:
     enabled: true
-    nodeSelector: 
-      kubernetes.io/hostname: worker-1
     service:
       type: LoadBalancer
   tls:
@@ -84,6 +83,21 @@ ipam:
 kubeProxyReplacement: "true"
 tls:
   secretsBackend: k8s
+prometheus:
+  enabled: true
+  port: 9962
+  serviceMonitor:
+    # -- Enable service monitors.
+    # This requires the prometheus CRDs to be available (see https://github.com/prometheus-operator/prometheus-operator/blob/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml)
+    enabled: true
+envoy:
+  prometheus:
+  enabled: true
+  port: 9962
+  serviceMonitor:
+    # -- Enable service monitors.
+    # This requires the prometheus CRDs to be available (see https://github.com/prometheus-operator/prometheus-operator/blob/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml)
+    enabled: true
 operator:
   replicas: 1
   tolerations:
@@ -91,6 +105,13 @@ operator:
       operator: "Equal"
       value: "critical"
       effect: "NoSchedule"
+  prometheus:
+  enabled: true
+  port: 9962
+  serviceMonitor:
+    # -- Enable service monitors.
+    # This requires the prometheus CRDs to be available (see https://github.com/prometheus-operator/prometheus-operator/blob/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml)
+    enabled: true
 cgroup:
   autoMount:
     # -- Enable auto mount of cgroup2 filesystem.

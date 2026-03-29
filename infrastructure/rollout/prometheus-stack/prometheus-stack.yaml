@@ -1,5 +1,21 @@
 ---
-# Source: prometheus-crds/templates/crd-podmonitors.yaml
+# Source: prometheus-stack/charts/node-exporter/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-stack-node-exporter
+  namespace: monitoring
+  labels:
+    helm.sh/chart: node-exporter-4.52.2
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: metrics
+    app.kubernetes.io/part-of: node-exporter
+    app.kubernetes.io/name: node-exporter
+    app.kubernetes.io/instance: prometheus-stack
+    app.kubernetes.io/version: "1.10.2"
+automountServiceAccountToken: false
+---
+# Source: prometheus-stack/charts/prometheus-crds/templates/crd-podmonitors.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -1398,7 +1414,7 @@ spec:
     subresources:
       status: {}
 ---
-# Source: prometheus-crds/templates/crd-probes.yaml
+# Source: prometheus-stack/charts/prometheus-crds/templates/crd-probes.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -2814,7 +2830,7 @@ spec:
     subresources:
       status: {}
 ---
-# Source: prometheus-crds/templates/crd-prometheuses.yaml
+# Source: prometheus-stack/charts/prometheus-crds/templates/crd-prometheuses.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -16534,7 +16550,7 @@ spec:
         statusReplicasPath: .status.shards
       status: {}
 ---
-# Source: prometheus-crds/templates/crd-prometheusrules.yaml
+# Source: prometheus-stack/charts/prometheus-crds/templates/crd-prometheusrules.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -16801,7 +16817,7 @@ spec:
     subresources:
       status: {}
 ---
-# Source: prometheus-crds/templates/crd-scrapeconfigs.yaml
+# Source: prometheus-stack/charts/prometheus-crds/templates/crd-scrapeconfigs.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -29710,7 +29726,7 @@ spec:
     subresources:
       status: {}
 ---
-# Source: prometheus-crds/templates/crd-servicemonitors.yaml
+# Source: prometheus-stack/charts/prometheus-crds/templates/crd-servicemonitors.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -31123,20 +31139,179 @@ spec:
     subresources:
       status: {}
 ---
-# Source: prometheus-crds/templates/crd-podmonitors.yaml
+# Source: prometheus-stack/charts/node-exporter/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-stack-node-exporter
+  namespace: monitoring
+  labels:
+    helm.sh/chart: node-exporter-4.52.2
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: metrics
+    app.kubernetes.io/part-of: node-exporter
+    app.kubernetes.io/name: node-exporter
+    app.kubernetes.io/instance: prometheus-stack
+    app.kubernetes.io/version: "1.10.2"
+  annotations:
+    prometheus.io/path: /metrics
+    prometheus.io/port: "9100"
+    prometheus.io/scrape: "true"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9100
+      targetPort: 9100
+      protocol: TCP
+      name: metrics
+  selector:
+    app.kubernetes.io/name: node-exporter
+    app.kubernetes.io/instance: prometheus-stack
+---
+# Source: prometheus-stack/charts/node-exporter/templates/daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: prometheus-stack-node-exporter
+  namespace: monitoring
+  labels:
+    helm.sh/chart: node-exporter-4.52.2
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: metrics
+    app.kubernetes.io/part-of: node-exporter
+    app.kubernetes.io/name: node-exporter
+    app.kubernetes.io/instance: prometheus-stack
+    app.kubernetes.io/version: "1.10.2"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: node-exporter
+      app.kubernetes.io/instance: prometheus-stack
+  revisionHistoryLimit: 10
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+      labels:
+        helm.sh/chart: node-exporter-4.52.2
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: metrics
+        app.kubernetes.io/part-of: node-exporter
+        app.kubernetes.io/name: node-exporter
+        app.kubernetes.io/instance: prometheus-stack
+        app.kubernetes.io/version: "1.10.2"
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 65534
+        runAsGroup: 65534
+        runAsNonRoot: true
+        runAsUser: 65534
+      serviceAccountName: prometheus-stack-node-exporter
+      containers:
+        - name: node-exporter
+          image: quay.io/prometheus/node-exporter:v1.10.2
+          imagePullPolicy: IfNotPresent
+          args:
+            - --path.procfs=/host/proc
+            - --path.sysfs=/host/sys
+            - --path.rootfs=/host/root
+            - --path.udev.data=/host/root/run/udev/data
+            - --web.listen-address=[$(HOST_IP)]:9100
+          securityContext:
+            readOnlyRootFilesystem: true
+          env:
+            - name: HOST_IP
+              value: 0.0.0.0
+          ports:
+            - name: metrics
+              containerPort: 9100
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              httpHeaders:
+              path: /
+              port: metrics
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              httpHeaders:
+              path: /
+              port: metrics
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          volumeMounts:
+            - name: proc
+              mountPath: /host/proc
+              readOnly:  true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+            - name: root
+              mountPath: /host/root
+              mountPropagation: HostToContainer
+              readOnly: true
+      hostNetwork: true
+      hostPID: true
+      hostIPC: false
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: eks.amazonaws.com/compute-type
+                operator: NotIn
+                values:
+                - fargate
+              - key: type
+                operator: NotIn
+                values:
+                - virtual-kubelet
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+        - effect: NoSchedule
+          key: critical-components
+          operator: Equal
+          value: critical
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
+        - name: root
+          hostPath:
+            path: /
+---
+# Source: prometheus-stack/charts/prometheus-crds/templates/crd-podmonitors.yaml
 # https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.90.1/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
 ---
-# Source: prometheus-crds/templates/crd-probes.yaml
+# Source: prometheus-stack/charts/prometheus-crds/templates/crd-probes.yaml
 # https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.90.1/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
 ---
-# Source: prometheus-crds/templates/crd-prometheuses.yaml
+# Source: prometheus-stack/charts/prometheus-crds/templates/crd-prometheuses.yaml
 # https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.90.1/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
 ---
-# Source: prometheus-crds/templates/crd-prometheusrules.yaml
+# Source: prometheus-stack/charts/prometheus-crds/templates/crd-prometheusrules.yaml
 # https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.90.1/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
 ---
-# Source: prometheus-crds/templates/crd-scrapeconfigs.yaml
+# Source: prometheus-stack/charts/prometheus-crds/templates/crd-scrapeconfigs.yaml
 # https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.90.1/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml
 ---
-# Source: prometheus-crds/templates/crd-servicemonitors.yaml
+# Source: prometheus-stack/charts/prometheus-crds/templates/crd-servicemonitors.yaml
 # https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.90.1/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml

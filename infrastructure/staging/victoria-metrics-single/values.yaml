@@ -16,7 +16,5 @@ server:
     node-role.kubernetes.io/control-plane: ""
   service:
     type: LoadBalancer
-    annotations:
-      prometheus.io/scrape: "true"
-      prometheus.io/port: "8080"
-      prometheus.io/path: "/metrics"
+  serviceMonitor:
+    enabled: true

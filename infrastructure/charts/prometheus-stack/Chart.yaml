@@ -1,0 +1,14 @@
+apiVersion: v2
+name: prometheus-stack
+description: A custom Prometheus stack with Prometheus CRDs, Prometheus Node Exporter.
+type: application
+version: 1.0.0
+appVersion: "1.10.0"
+dependencies:
+  - name: prometheus-crds
+    version: 0.1.0
+    repository: "file://./dependencies/prometheus-crds"
+  - name: prometheus-node-exporter
+    alias: node-exporter
+    version: 4.52.2
+    repository: "file://./dependencies/prometheus-node-exporter"

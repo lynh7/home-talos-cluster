@@ -92,8 +92,7 @@ grafana-alloy:
 
         loki.write "victorialogs" {
           endpoint {
-            // VictoriaLogs has a Loki-compatible push endpoint
-            url = "http://victoria-logs.monitoring.svc.cluster.local:9428/insert/loki/api/v1/push"
+            url = "http://victoria-logs-single-server.monitoring.svc.cluster.local:9428/insert/loki/api/v1/push"
           }
         }
         

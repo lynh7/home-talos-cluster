@@ -636,11 +636,6 @@ spec:
               port: 3000
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
-      tolerations:
-        - effect: NoSchedule
-          key: critical-components
-          operator: Equal
-          value: critical
       volumes:
         - name: config
           configMap:

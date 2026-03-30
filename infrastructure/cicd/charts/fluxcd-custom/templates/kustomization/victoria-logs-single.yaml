@@ -1,0 +1,15 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: rollout-victoria-metrics-single
+  namespace: flux-system
+spec:
+  interval: 2m
+  path: ./infrastructure/rollout/victoria-metrics-single
+  prune: true
+  targetNamespace: monitoring
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  wait: true
+  timeout: 35m

@@ -35,6 +35,15 @@ grafana-alloy:
         prometheus.operator.servicemonitors "default" {
           forward_to = [prometheus.remote_write.victoria.receiver]
         }
+        
+        // ─────────────────────────────────────────────────────────
+        // PodMonitor-based discovery
+        // Alloy watches all PodMonitor CRDs cluster-wide
+        // and auto-configures scrape jobs from them.
+        // ─────────────────────────────────────────────────────────
+        prometheus.operator.podmonitors "default" {
+          forward_to = [prometheus.remote_write.victoria.receiver]
+        }
 
         // ─────────────────────────────────────────────────────────
         // Remote Write to VictoriaMetrics

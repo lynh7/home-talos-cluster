@@ -59,26 +59,16 @@ data:
     }
     
     // ─────────────────────────────────────────────────────────
-    // ServiceMonitor-based discovery
-    // Alloy watches all ServiceMonitor CRDs cluster-wide
-    // and auto-configures scrape jobs from them.
+    // Metrics
     // ─────────────────────────────────────────────────────────
     prometheus.operator.servicemonitors "default" {
       forward_to = [prometheus.remote_write.victoria.receiver]
     }
     
-    // ─────────────────────────────────────────────────────────
-    // PodMonitor-based discovery
-    // Alloy watches all PodMonitor CRDs cluster-wide
-    // and auto-configures scrape jobs from them.
-    // ─────────────────────────────────────────────────────────
     prometheus.operator.podmonitors "default" {
       forward_to = [prometheus.remote_write.victoria.receiver]
     }
     
-    // ─────────────────────────────────────────────────────────
-    // Remote Write to VictoriaMetrics
-    // ─────────────────────────────────────────────────────────
     prometheus.remote_write "victoria" {
       endpoint {
         url = "http://victoria-metrics-single-server.monitoring.svc.cluster.local:8428/api/v1/write"
@@ -92,6 +82,25 @@ data:
     
       external_labels = {
         cluster = "homelab-staging",
+      }
+    }
+    
+    // ─────────────────────────────────────────────────────────
+    // Logs 
+    // ─────────────────────────────────────────────────────────
+    discovery.kubernetes "pods" {
+      role = "pod"
+    }
+    
+    loki.source.kubernetes "pod_logs" {
+      targets    = discovery.kubernetes.pods.targets
+      forward_to = [loki.write.victorialogs.receiver]
+    }
+    
+    loki.write "victorialogs" {
+      endpoint {
+        // VictoriaLogs has a Loki-compatible push endpoint
+        url = "http://victoria-logs.monitoring.svc.cluster.local:9428/insert/loki/api/v1/push"
       }
     }
 ---
@@ -402,7 +411,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: alloy
-        checksum/config: 3c41dca026aafb9ff800e8c6514ae7040bf7f18a68022341a44743348d74a00
+        checksum/config: 921523aed3ba5ae7f7f4f776e1a81dde057a89af01d4d8cadc3a3427565d39a
       labels:
         app.kubernetes.io/name: grafana-alloy
         app.kubernetes.io/instance: grafana-stack

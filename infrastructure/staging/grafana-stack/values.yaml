@@ -4,6 +4,8 @@
 grafana:
   service:
     type: LoadBalancer
+  serviceMonitor:
+    enabled: true
   #-- Schedule Grafana to run on master node  
   tolerations:
     - key: "critical-components"
@@ -64,4 +66,4 @@ grafana-alloy:
     enabled: true
     type: LoadBalancer
   serviceMonitor:
-    enabled: false
+    enabled: true

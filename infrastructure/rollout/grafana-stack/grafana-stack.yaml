@@ -551,3 +551,55 @@ spec:
             name: grafana-stack
         - name: storage
           emptyDir: {}
+---
+# Source: grafana-stack/charts/grafana-alloy/templates/servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: grafana-stack-grafana-alloy
+  namespace: monitoring
+  labels:
+    helm.sh/chart: grafana-alloy-1.2.0
+    app.kubernetes.io/name: grafana-alloy
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "v1.10.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: alloy
+    app.kubernetes.io/component: metrics
+spec:
+  endpoints:
+  - port: http-metrics
+    scheme: http
+    honorLabels: true
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: grafana-alloy
+      app.kubernetes.io/instance: grafana-stack
+---
+# Source: grafana-stack/charts/grafana/templates/servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: grafana-stack
+  namespace: monitoring
+  labels:
+    helm.sh/chart: grafana-9.3.0
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "12.1.0"
+spec:
+  endpoints:
+  - port: service
+    interval: 30s
+    scrapeTimeout: 30s
+    honorLabels: true
+    path: /metrics
+    scheme: http
+  jobLabel: "grafana-stack"
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+      app.kubernetes.io/instance: grafana-stack
+  namespaceSelector:
+    matchNames:
+      - monitoring

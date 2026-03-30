@@ -148,7 +148,7 @@ data:
     }
     
     loki.source.kubernetes "pod_logs" {
-      targets    = discovery.kubernetes.pods.targets
+      targets    = discovery.relabel.pod_logs.output
       forward_to = [loki.write.victorialogs.receiver]
     }
     
@@ -465,7 +465,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: alloy
-        checksum/config: 00697b93160b4b34cfb41d57a81c2b06c0083eedaab9e778dcbff488085ccdc
+        checksum/config: 6734a4b07f06338e583229d612479bc49d50bd6e5f1c3e44978de2df09429c1
       labels:
         app.kubernetes.io/name: grafana-alloy
         app.kubernetes.io/instance: grafana-stack

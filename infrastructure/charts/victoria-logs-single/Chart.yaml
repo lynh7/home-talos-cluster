@@ -22,10 +22,10 @@ appVersion: v1.48.0
 dependencies:
 - condition: vector.enabled
   name: vector
-  repository: https://helm.vector.dev
+  repository: file://./dependencies/vector
   version: 0.51.*
 - name: victoria-metrics-common
-  repository: https://victoriametrics.github.io/helm-charts/
+  repository: "file://./dependencies/victoria-metrics-common"
   version: 0.0.*
 description: The VictoriaLogs single Helm chart deploys VictoriaLogs database in Kubernetes.
 home: https://github.com/VictoriaMetrics/helm-charts

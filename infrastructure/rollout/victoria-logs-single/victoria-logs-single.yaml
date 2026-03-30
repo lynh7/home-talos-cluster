@@ -75,7 +75,7 @@ spec:
             - --http.shutdownDelay=15s
             - --httpListenAddr=:9428
             - --loggerFormat=json
-            - --retentionPeriod=2w
+            - --retentionPeriod=1
             - --storageDataPath=/storage
           ports:
             - name: http

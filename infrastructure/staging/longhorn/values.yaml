@@ -25,6 +25,10 @@ persistence:
 defaultSettings:
   deletingConfirmationFlag: true
 
+metrics:
+  serviceMonitor:
+    enabled: true
+
 #################################
 #### Longhorn Uninstall Job #####
 #################################

@@ -6,12 +6,6 @@ grafana:
     type: LoadBalancer
   serviceMonitor:
     enabled: true
-  #-- Schedule Grafana to run on master node  
-  tolerations:
-    - key: "critical-components"
-      operator: "Equal"
-      value: "critical"
-      effect: "NoSchedule"
   nodeSelector:
     node-role.kubernetes.io/control-plane: ""
   datasources:

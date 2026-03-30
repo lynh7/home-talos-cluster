@@ -27,9 +27,9 @@ grafana:
           jsonData:
             timeInterval: "30s"  # match your Alloy scrape_interval
   
-        - name: Loki
+        - name: VictoriaLogs
           type: loki
-          url: http://loki.monitoring.svc.cluster.local:3100
+          url: http://http://victoria-logs-single-server.monitoring.svc.cluster.local:9428
           access: proxy
           editable: false
           jsonData:

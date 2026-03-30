@@ -68,6 +68,15 @@ data:
     }
     
     // ─────────────────────────────────────────────────────────
+    // PodMonitor-based discovery
+    // Alloy watches all PodMonitor CRDs cluster-wide
+    // and auto-configures scrape jobs from them.
+    // ─────────────────────────────────────────────────────────
+    prometheus.operator.podmonitors "default" {
+      forward_to = [prometheus.remote_write.victoria.receiver]
+    }
+    
+    // ─────────────────────────────────────────────────────────
     // Remote Write to VictoriaMetrics
     // ─────────────────────────────────────────────────────────
     prometheus.remote_write "victoria" {
@@ -372,7 +381,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: alloy
-        checksum/config: ef829d3f638f0ffa06de9138dff27accc9862151249a699e5fa8d00d9be7800
+        checksum/config: 3c41dca026aafb9ff800e8c6514ae7040bf7f18a68022341a44743348d74a00
       labels:
         app.kubernetes.io/name: grafana-alloy
         app.kubernetes.io/instance: grafana-stack

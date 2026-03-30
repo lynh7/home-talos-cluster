@@ -92,6 +92,61 @@ data:
       role = "pod"
     }
     
+    discovery.relabel "pod_logs" {
+      targets = discovery.kubernetes.pods.targets
+    
+      // Drop pods that are not running — avoids scraping terminating pods
+      rule {
+        source_labels = ["__meta_kubernetes_pod_phase"]
+        action        = "keep"
+        regex         = "Running"
+      }
+    
+      // Namespace as label
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        target_label  = "namespace"
+      }
+    
+      // Pod name
+      rule {
+        source_labels = ["__meta_kubernetes_pod_name"]
+        target_label  = "pod"
+      }
+    
+      // Container name — important when a pod has multiple containers
+      rule {
+        source_labels = ["__meta_kubernetes_pod_container_name"]
+        target_label  = "container"
+      }
+    
+      // App label (most deployments set this)
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_app"]
+        target_label  = "app"
+      }
+    
+      // app.kubernetes.io/name (Helm charts use this)
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+        target_label  = "app"
+        regex         = "(.+)"  // only override if non-empty
+      }
+    
+      // Node the pod runs on
+      rule {
+        source_labels = ["__meta_kubernetes_pod_node_name"]
+        target_label  = "node"
+      }
+    
+      // Compose the job label: namespace/app
+      rule {
+        source_labels = ["namespace", "app"]
+        separator     = "/"
+        target_label  = "job"
+      }
+    }
+    
     loki.source.kubernetes "pod_logs" {
       targets    = discovery.kubernetes.pods.targets
       forward_to = [loki.write.victorialogs.receiver]
@@ -410,7 +465,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: alloy
-        checksum/config: d75a30876e662560be9ec3a92e46488d4f171e170bb4db1ed5ef0bcde63264a
+        checksum/config: 00697b93160b4b34cfb41d57a81c2b06c0083eedaab9e778dcbff488085ccdc
       labels:
         app.kubernetes.io/name: grafana-alloy
         app.kubernetes.io/instance: grafana-stack

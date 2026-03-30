@@ -52,26 +52,16 @@ grafana-alloy:
         }
 
         // ─────────────────────────────────────────────────────────
-        // ServiceMonitor-based discovery
-        // Alloy watches all ServiceMonitor CRDs cluster-wide
-        // and auto-configures scrape jobs from them.
+        // Metrics
         // ─────────────────────────────────────────────────────────
         prometheus.operator.servicemonitors "default" {
           forward_to = [prometheus.remote_write.victoria.receiver]
         }
         
-        // ─────────────────────────────────────────────────────────
-        // PodMonitor-based discovery
-        // Alloy watches all PodMonitor CRDs cluster-wide
-        // and auto-configures scrape jobs from them.
-        // ─────────────────────────────────────────────────────────
         prometheus.operator.podmonitors "default" {
           forward_to = [prometheus.remote_write.victoria.receiver]
         }
 
-        // ─────────────────────────────────────────────────────────
-        // Remote Write to VictoriaMetrics
-        // ─────────────────────────────────────────────────────────
         prometheus.remote_write "victoria" {
           endpoint {
             url = "http://victoria-metrics-single-server.monitoring.svc.cluster.local:8428/api/v1/write"
@@ -85,6 +75,25 @@ grafana-alloy:
 
           external_labels = {
             cluster = "homelab-staging",
+          }
+        }
+
+        // ─────────────────────────────────────────────────────────
+        // Logs 
+        // ─────────────────────────────────────────────────────────
+        discovery.kubernetes "pods" {
+          role = "pod"
+        }
+
+        loki.source.kubernetes "pod_logs" {
+          targets    = discovery.kubernetes.pods.targets
+          forward_to = [loki.write.victorialogs.receiver]
+        }
+
+        loki.write "victorialogs" {
+          endpoint {
+            // VictoriaLogs has a Loki-compatible push endpoint
+            url = "http://victoria-logs.monitoring.svc.cluster.local:9428/insert/loki/api/v1/push"
           }
         }
         

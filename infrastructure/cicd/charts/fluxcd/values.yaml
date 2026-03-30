@@ -100,7 +100,7 @@ flux2:
   prometheus:
     podMonitor:
       # -- Enables podMonitor endpoint
-      create: false
+      create: true
       podMetricsEndpoints:
         - port: http-prom
           relabelings:

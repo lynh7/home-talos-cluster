@@ -122,6 +122,27 @@ data:
     provisioning = /etc/grafana/provisioning
     [server]
     domain = ''
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+    - access: proxy
+      editable: false
+      isDefault: true
+      jsonData:
+        timeInterval: 30s
+      name: VictoriaMetrics
+      type: prometheus
+      url: http://victoria-metrics-single-server.monitoring.svc.cluster.local:8428
+    - access: proxy
+      editable: false
+      jsonData:
+        maxLines: 1000
+      name: Loki
+      type: loki
+      url: http://loki.monitoring.svc.cluster.local:3100
+    deleteDatasources:
+    - name: Prometheus
+      orgId: 1
 ---
 # Source: grafana-stack/charts/grafana-alloy/templates/rbac.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -469,7 +490,7 @@ spec:
         app.kubernetes.io/instance: grafana-stack
         app.kubernetes.io/version: "12.1.0"
       annotations:
-        checksum/config: 0e9cbd0ea8e24e32f7dfca5bab17a2ba05652642f0a09a4882833ae88e4cc4a3
+        checksum/config: d6a78de47e1df4f2b1e1cebbcf0f901f52363d333c6614c3e42f3a95a4acda36
         checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
         kubectl.kubernetes.io/default-container: grafana
     spec:
@@ -500,6 +521,9 @@ spec:
               subPath: grafana.ini
             - name: storage
               mountPath: "/var/lib/grafana"
+            - name: config
+              mountPath: "/etc/grafana/provisioning/datasources/datasources.yaml"
+              subPath: "datasources.yaml"
           ports:
             - name: grafana
               containerPort: 3000

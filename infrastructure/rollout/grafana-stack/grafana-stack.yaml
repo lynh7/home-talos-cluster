@@ -200,9 +200,9 @@ data:
       editable: false
       jsonData:
         maxLines: 1000
-      name: Loki
+      name: VictoriaLogs
       type: loki
-      url: http://loki.monitoring.svc.cluster.local:3100
+      url: http://http://victoria-logs-single-server.monitoring.svc.cluster.local:9428
     deleteDatasources:
     - name: Prometheus
       orgId: 1
@@ -553,7 +553,7 @@ spec:
         app.kubernetes.io/instance: grafana-stack
         app.kubernetes.io/version: "12.1.0"
       annotations:
-        checksum/config: d6a78de47e1df4f2b1e1cebbcf0f901f52363d333c6614c3e42f3a95a4acda36
+        checksum/config: ba8f634eb3e535aeb4bb5f1114990424d6afe90b082ae40ad7fb095117dbd3ea
         checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
         kubectl.kubernetes.io/default-container: grafana
     spec:

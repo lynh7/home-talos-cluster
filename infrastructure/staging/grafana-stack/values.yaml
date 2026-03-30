@@ -14,6 +14,30 @@ grafana:
       effect: "NoSchedule"
   nodeSelector:
     node-role.kubernetes.io/control-plane: ""
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: VictoriaMetrics
+          type: prometheus        # VM is Prometheus-compatible, use prometheus type
+          url: http://victoria-metrics-single-server.monitoring.svc.cluster.local:8428
+          access: proxy
+          isDefault: true
+          editable: false
+          jsonData:
+            timeInterval: "30s"  # match your Alloy scrape_interval
+  
+        - name: Loki
+          type: loki
+          url: http://loki.monitoring.svc.cluster.local:3100
+          access: proxy
+          editable: false
+          jsonData:
+            maxLines: 1000
+  
+      deleteDatasources:
+        - name: Prometheus        # clean up the old default if it existed
+          orgId: 1
 
 #################################
 #### Grafana Alloy Config #####

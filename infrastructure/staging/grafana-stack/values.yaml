@@ -141,7 +141,7 @@ grafana-alloy:
         }
 
         loki.source.kubernetes "pod_logs" {
-          targets    = discovery.kubernetes.pods.targets
+          targets    = discovery.relabel.pod_logs.output
           forward_to = [loki.write.victorialogs.receiver]
         }
 

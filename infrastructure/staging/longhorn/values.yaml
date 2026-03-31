@@ -6,8 +6,7 @@ global:
       effect: "NoSchedule"
 longhornUI:
   replicas: 1
-  nodeSelector:
-    node-role.kubernetes.io/control-plane: ""
+  
 csi:
   # -- Replica count of the CSI Attacher
   attacherReplicaCount: 1

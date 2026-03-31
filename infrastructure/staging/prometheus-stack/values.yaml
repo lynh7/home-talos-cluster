@@ -64,3 +64,19 @@ node-exporter:
   prometheus:
     monitor:
       enabled: true
+
+
+####################################
+######## kube-state-metrics ########
+####################################
+state-metrics:
+  tolerations:
+  - key: "critical-components"
+    operator: "Equal"
+    value: "critical"
+    effect: "NoSchedule"
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""
+  prometheus:
+    monitor:
+      enabled: true

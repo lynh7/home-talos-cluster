@@ -12,3 +12,7 @@ dependencies:
     alias: node-exporter
     version: 4.52.2
     repository: "file://./dependencies/prometheus-node-exporter"
+  - name: kube-state-metrics
+    alias: state-metrics
+    version: 7.0.0
+    repository: "file://./dependencies/kube-state-metrics"

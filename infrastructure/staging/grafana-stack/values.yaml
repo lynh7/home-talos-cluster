@@ -6,6 +6,12 @@ grafana:
     type: LoadBalancer
   serviceMonitor:
     enabled: true
+    #-- Allowing schedule Grafana to run on master node  
+  tolerations:
+    - key: "critical-components"
+      operator: "Equal"
+      value: "critical"
+      effect: "NoSchedule"
   datasources:
     datasources.yaml:
       apiVersion: 1

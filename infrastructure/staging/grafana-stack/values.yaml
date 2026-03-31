@@ -34,7 +34,7 @@ grafana:
   dashboards:
     default:
       kubernetes-nodes:
-        gnetId: 38171
+        gnetId: 8171
         revision: 1
         datasource: Prometheus
         

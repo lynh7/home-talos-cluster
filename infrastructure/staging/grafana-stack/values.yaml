@@ -31,11 +31,34 @@ grafana:
         - name: Prometheus        # clean up the old default if it existed
           orgId: 1
 
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus   # MUST match dashboard datasource
+          type: prometheus
+          url: http://prometheus-server
+          access: proxy
+          isDefault: true
+
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: default
+          orgId: 1
+          folder: ""
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
+
   dashboards:
     default:
-      kubernetes-nodes:
+      dashboard-8171:
         gnetId: 8171
-        revision: 1
+        revision: 1     # safe default; can change later
         datasource: Prometheus
         
   persistence:

@@ -189,26 +189,25 @@ data:
     apiVersion: 1
     datasources:
     - access: proxy
-      editable: false
       isDefault: true
-      jsonData:
-        timeInterval: 30s
-      name: VictoriaMetrics
+      name: Prometheus
       type: prometheus
-      url: http://victoria-metrics-single-server.monitoring.svc.cluster.local:8428
-    - access: proxy
-      editable: false
-      jsonData:
-        maxLines: 1000
-      name: VictoriaLogs
-      type: loki
-      url: http://http://victoria-logs-single-server.monitoring.svc.cluster.local:9428
-    deleteDatasources:
-    - name: Prometheus
+      url: http://prometheus-server
+  dashboardproviders.yaml: |
+    apiVersion: 1
+    providers:
+    - disableDeletion: false
+      editable: true
+      folder: ""
+      name: default
+      options:
+        path: /var/lib/grafana/dashboards/default
       orgId: 1
+      type: file
   download_dashboards.sh: |
     #!/usr/bin/env sh
     set -euf
+    mkdir -p /var/lib/grafana/dashboards/default
   
     curl -skf \
     --connect-timeout 60 \
@@ -217,7 +216,7 @@ data:
     -H "Content-Type: application/json;charset=UTF-8" \
       "https://grafana.com/api/dashboards/8171/revisions/1/download" \
       | sed '/-- .* --/! s/"datasource":.*,/"datasource": "Prometheus",/g' \
-    > "/var/lib/grafana/dashboards/default/kubernetes-nodes.json"
+    > "/var/lib/grafana/dashboards/default/dashboard-8171.json"
 ---
 # Source: grafana-stack/charts/grafana/templates/dashboards-json-configmap.yaml
 apiVersion: v1
@@ -600,7 +599,7 @@ spec:
         app.kubernetes.io/instance: grafana-stack
         app.kubernetes.io/version: "12.1.0"
       annotations:
-        checksum/config: 2725a5ac94d3230ccc67db429a40a5c09a31d3561feadb269f571cd271e80ea3
+        checksum/config: cac48f8daf95c7722d03cdb4c32d5fa38f6fdf47ab3fdaff0e336e3f299d6368
         checksum/dashboards-json-config: e1257581afc68714be18658707642e5300064b473127b7a511afc5e353259d2f
         checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
         kubectl.kubernetes.io/default-container: grafana
@@ -677,6 +676,9 @@ spec:
             - name: config
               mountPath: "/etc/grafana/provisioning/datasources/datasources.yaml"
               subPath: "datasources.yaml"
+            - name: config
+              mountPath: "/etc/grafana/provisioning/dashboards/dashboardproviders.yaml"
+              subPath: "dashboardproviders.yaml"
           ports:
             - name: grafana
               containerPort: 3000

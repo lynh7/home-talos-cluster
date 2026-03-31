@@ -634,8 +634,6 @@ spec:
             httpGet:
               path: /api/health
               port: 3000
-      nodeSelector:
-        node-role.kubernetes.io/control-plane: ""
       volumes:
         - name: config
           configMap:

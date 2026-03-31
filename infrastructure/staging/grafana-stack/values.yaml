@@ -37,6 +37,7 @@ grafana:
         gnetId: 38171
         revision: 1
         datasource: Prometheus
+        
   persistence:
     type: pvc
     enabled: true

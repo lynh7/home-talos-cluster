@@ -206,6 +206,53 @@ data:
     deleteDatasources:
     - name: Prometheus
       orgId: 1
+  download_dashboards.sh: |
+    #!/usr/bin/env sh
+    set -euf
+  
+    curl -skf \
+    --connect-timeout 60 \
+    --max-time 60 \
+    -H "Accept: application/json" \
+    -H "Content-Type: application/json;charset=UTF-8" \
+      "https://grafana.com/api/dashboards/38171/revisions/1/download" \
+      | sed '/-- .* --/! s/"datasource":.*,/"datasource": "Prometheus",/g' \
+    > "/var/lib/grafana/dashboards/default/kubernetes-nodes.json"
+---
+# Source: grafana-stack/charts/grafana/templates/dashboards-json-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-stack-dashboards-default
+  namespace: monitoring
+  labels:
+    helm.sh/chart: grafana-9.3.0
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "12.1.0"
+    dashboard-provider: default
+data:
+  {}
+---
+# Source: grafana-stack/charts/grafana/templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-stack
+  namespace: monitoring
+  labels:
+    helm.sh/chart: grafana-9.3.0
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana-stack
+    app.kubernetes.io/version: "12.1.0"
+  finalizers:
+    - kubernetes.io/pvc-protection
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "500Mi"
 ---
 # Source: grafana-stack/charts/grafana-alloy/templates/rbac.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -553,7 +600,8 @@ spec:
         app.kubernetes.io/instance: grafana-stack
         app.kubernetes.io/version: "12.1.0"
       annotations:
-        checksum/config: ba8f634eb3e535aeb4bb5f1114990424d6afe90b082ae40ad7fb095117dbd3ea
+        checksum/config: 83bc4ff883419a60a10f7551743846716ab525c1140a51f417b2850b49b1dc6b
+        checksum/dashboards-json-config: e1257581afc68714be18658707642e5300064b473127b7a511afc5e353259d2f
         checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
         kubectl.kubernetes.io/default-container: grafana
     spec:
@@ -566,6 +614,48 @@ spec:
         runAsGroup: 472
         runAsNonRoot: true
         runAsUser: 472
+      initContainers:
+        - name: init-chown-data
+          image: "docker.io/library/busybox:1.31.1"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            capabilities:
+              add:
+              - CHOWN
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+            runAsNonRoot: false
+            runAsUser: 0
+            seccompProfile:
+              type: RuntimeDefault
+          command:
+            - chown
+            - -R
+            - 472:472
+            - /var/lib/grafana
+          volumeMounts:
+            - name: storage
+              mountPath: "/var/lib/grafana"
+        - name: download-dashboards
+          image: "docker.io/curlimages/curl:8.9.1"
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh"]
+          args: [ "-c", "mkdir -p /var/lib/grafana/dashboards/default && /bin/sh -x /etc/grafana/download_dashboards.sh" ]
+          env:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: config
+              mountPath: "/etc/grafana/download_dashboards.sh"
+              subPath: download_dashboards.sh
+            - name: storage
+              mountPath: "/var/lib/grafana"
       enableServiceLinks: true
       containers:
         - name: grafana
@@ -638,8 +728,12 @@ spec:
         - name: config
           configMap:
             name: grafana-stack
+        - name: dashboards-default
+          configMap:
+            name: grafana-stack-dashboards-default
         - name: storage
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: grafana-stack
 ---
 # Source: grafana-stack/charts/grafana-alloy/templates/servicemonitor.yaml
 apiVersion: monitoring.coreos.com/v1

@@ -6,8 +6,6 @@ grafana:
     type: LoadBalancer
   serviceMonitor:
     enabled: true
-  nodeSelector:
-    node-role.kubernetes.io/control-plane: ""
   datasources:
     datasources.yaml:
       apiVersion: 1

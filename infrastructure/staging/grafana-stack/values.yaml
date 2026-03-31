@@ -31,6 +31,16 @@ grafana:
         - name: Prometheus        # clean up the old default if it existed
           orgId: 1
 
+  dashboards:
+    default:
+      kubernetes-nodes:
+        gnetId: 38171
+        revision: 1
+        datasource: Prometheus
+  persistence:
+    type: pvc
+    enabled: true
+    size: 500Mi
 #################################
 #### Grafana Alloy Config #####
 #################################

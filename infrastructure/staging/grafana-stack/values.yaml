@@ -60,8 +60,8 @@ grafana:
         gnetId: 8171
         revision: 1
         datasource: VictoriaMetrics
-      dashboard-21742:
-        gnetId: 21742
+      dashboard-17519:
+        gnetId: 17519
         revision: 1
         datasource: VictoriaMetrics  
 

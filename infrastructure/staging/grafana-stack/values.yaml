@@ -60,7 +60,11 @@ grafana:
         gnetId: 8171
         revision: 1
         datasource: VictoriaMetrics
-        
+      dashboard-21742:
+        gnetId: 21742
+        revision: 1
+        datasource: VictoriaMetrics  
+
   persistence:
     type: pvc
     enabled: true

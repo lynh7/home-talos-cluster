@@ -4,7 +4,7 @@
 set -o pipefail
 
 # Configuration
-CONTROL_PLANE_IP="${CONTROL_PLANE_IP:-10.10.0.30}"
+CONTROL_PLANE_IP="${CONTROL_PLANE_IP:-192.168.10.50}"
 TALOSCONFIG="${TALOSCONFIG:-~/talosconfig}"
 KUBECONFIG="${KUBECONFIG:-~/.kube/config}"
 MAX_RETRIES=3

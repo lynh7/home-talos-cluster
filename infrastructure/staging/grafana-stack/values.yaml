@@ -95,23 +95,26 @@ grafana-alloy:
         prometheus.operator.podmonitors "default" {
           forward_to = [prometheus.remote_write.victoria.receiver]
         }
-
-        prometheus.scrape "external-node" {
+        
+        prometheus.scrape "external_node" {
           targets = [
             {
-              __address__ = "192.168.10.99:9100",
-              job = "external-node"
+              address = "192.168.10.99:9100"
+              labels = {
+                job = "external-node"
+              }
             }
           ]
 
           scrape_interval = "30s"
-          scrape_timeout = "10s"
+          scrape_timeout  = "10s"
 
-          // Add node label for consistency
-          rule {
-            target_label = "node"
-            replacement  = "external-node"
-          }
+          relabel_configs = [
+            {
+              target_label = "node"
+              replacement  = "external-node"
+            }
+          ]
 
           forward_to = [prometheus.remote_write.victoria.receiver]
         }

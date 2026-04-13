@@ -72,7 +72,7 @@ data:
     prometheus.scrape "external_node" {
       targets = [
         {
-          address = "192.168.10.99:9100",
+          __address__ = "192.168.10.99:9100",
           labels = {
             job  = "external-node",
             node = "external-node",
@@ -546,7 +546,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: alloy
-        checksum/config: 044275ffe80e70b40e7675b1433936731aab5535773a15a7eb0d2961c24142c
+        checksum/config: 9ebe4de42aad548e284ab1644c93474b11ad1e267ca6fc5415472b60ca4e475
       labels:
         app.kubernetes.io/name: grafana-alloy
         app.kubernetes.io/instance: grafana-stack

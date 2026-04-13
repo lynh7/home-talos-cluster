@@ -69,22 +69,25 @@ data:
       forward_to = [prometheus.remote_write.victoria.receiver]
     }
     
-    prometheus.scrape "external-node" {
+    prometheus.scrape "external_node" {
       targets = [
         {
-          __address__ = "192.168.10.99:9100",
-          job = "external-node"
+          address = "192.168.10.99:9100"
+          labels = {
+            job = "external-node"
+          }
         }
       ]
     
       scrape_interval = "30s"
-      scrape_timeout = "10s"
+      scrape_timeout  = "10s"
     
-      // Add node label for consistency
-      rule {
-        target_label = "node"
-        replacement  = "external-node"
-      }
+      relabel_configs = [
+        {
+          target_label = "node"
+          replacement  = "external-node"
+        }
+      ]
     
       forward_to = [prometheus.remote_write.victoria.receiver]
     }
@@ -549,7 +552,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: alloy
-        checksum/config: 1b410f92f7a4a934162d1c01774c9909ebd059653a88c1317a7c7ee9b27215b
+        checksum/config: 5597961cd3ca98bd57e7306925155c0df7e79ad6dd8dd2ffefc12fc148bfdc6
       labels:
         app.kubernetes.io/name: grafana-alloy
         app.kubernetes.io/instance: grafana-stack

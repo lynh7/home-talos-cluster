@@ -238,9 +238,27 @@ data:
     --max-time 60 \
     -H "Accept: application/json" \
     -H "Content-Type: application/json;charset=UTF-8" \
+      "https://grafana.com/api/dashboards/16613/revisions/1/download" \
+      | sed '/-- .* --/! s/"datasource":.*,/"datasource": "VictoriaMetrics",/g' \
+    > "/var/lib/grafana/dashboards/default/dashboard-16613.json"
+      
+    curl -skf \
+    --connect-timeout 60 \
+    --max-time 60 \
+    -H "Accept: application/json" \
+    -H "Content-Type: application/json;charset=UTF-8" \
       "https://grafana.com/api/dashboards/17519/revisions/1/download" \
       | sed '/-- .* --/! s/"datasource":.*,/"datasource": "VictoriaMetrics",/g' \
     > "/var/lib/grafana/dashboards/default/dashboard-17519.json"
+      
+    curl -skf \
+    --connect-timeout 60 \
+    --max-time 60 \
+    -H "Accept: application/json" \
+    -H "Content-Type: application/json;charset=UTF-8" \
+      "https://grafana.com/api/dashboards/24056/revisions/1/download" \
+      | sed '/-- .* --/! s/"datasource":.*,/"datasource": "VictoriaMetrics",/g' \
+    > "/var/lib/grafana/dashboards/default/dashboard-24056.json"
       
     curl -skf \
     --connect-timeout 60 \
@@ -632,7 +650,7 @@ spec:
         app.kubernetes.io/instance: grafana-stack
         app.kubernetes.io/version: "12.1.0"
       annotations:
-        checksum/config: 9b00124e6e019dc3d2d16ba0e3fe4723c15854294f398c792e831d7be1a9a6f8
+        checksum/config: 84413f482b36bab030c7642428118cf65a2a202c399aacc7327707037e7f4686
         checksum/dashboards-json-config: e1257581afc68714be18658707642e5300064b473127b7a511afc5e353259d2f
         checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
         kubectl.kubernetes.io/default-container: grafana

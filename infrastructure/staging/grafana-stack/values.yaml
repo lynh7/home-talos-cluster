@@ -75,6 +75,10 @@ grafana:
       dashboard-24056:
         gnetId: 24056
         revision: 1
+        datasource: VictoriaMetrics
+      dashboard-22084:
+        gnetId: 22084
+        revision: 1
         datasource: VictoriaMetrics    
 
   persistence:

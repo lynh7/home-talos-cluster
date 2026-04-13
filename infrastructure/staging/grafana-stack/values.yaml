@@ -99,7 +99,7 @@ grafana-alloy:
         prometheus.scrape "external_node" {
           targets = [
             {
-              address = "192.168.10.99:9100",
+              __address__ = "192.168.10.99:9100",
               labels = {
                 job  = "external-node",
                 node = "external-node",

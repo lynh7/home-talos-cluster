@@ -4039,7 +4039,7 @@
       "id": "L0PoA27R377jrnRWg1UTt",
       "type": "rectangle",
       "x": 2071.8736429398523,
-      "y": 282.1821486100156,
+      "y": 280.8071486100156,
       "width": 246.5169270833331,
       "height": 190.29296875,
       "angle": 0,
@@ -4057,16 +4057,16 @@
         "type": 3
       },
       "seed": 414732241,
-      "version": 68,
-      "versionNonce": 227945681,
-      "isDeleted": false,
+      "version": 70,
+      "versionNonce": 33989567,
+      "isDeleted": true,
       "boundElements": [
         {
           "id": "Xx1evrjTmswbpdUHKhqHt",
           "type": "arrow"
         }
       ],
-      "updated": 1776012393254,
+      "updated": 1776042831988,
       "link": null,
       "locked": false
     },
@@ -4127,11 +4127,11 @@
       "index": "b0Q",
       "roundness": null,
       "seed": 924736639,
-      "version": 178,
-      "versionNonce": 381460881,
-      "isDeleted": false,
+      "version": 179,
+      "versionNonce": 1932909361,
+      "isDeleted": true,
       "boundElements": null,
-      "updated": 1776012431883,
+      "updated": 1776042837160,
       "link": null,
       "locked": false,
       "text": "TRAFFIC RULES",
@@ -4166,16 +4166,11 @@
         "type": 3
       },
       "seed": 335930481,
-      "version": 141,
-      "versionNonce": 1655981937,
-      "isDeleted": false,
-      "boundElements": [
-        {
-          "id": "Xx1evrjTmswbpdUHKhqHt",
-          "type": "arrow"
-        }
-      ],
-      "updated": 1776012431883,
+      "version": 143,
+      "versionNonce": 1566556529,
+      "isDeleted": true,
+      "boundElements": [],
+      "updated": 1776042839343,
       "link": null,
       "locked": false
     },
@@ -4335,9 +4330,9 @@
       "id": "Xx1evrjTmswbpdUHKhqHt",
       "type": "arrow",
       "x": 2325.390570023186,
-      "y": 377.22863298501557,
+      "y": 375.85363298501557,
       "width": 351.83072916666697,
-      "height": 161.51692708333326,
+      "height": 162.89192708333326,
       "angle": 0,
       "strokeColor": "#1971c2",
       "backgroundColor": "transparent",
@@ -4351,11 +4346,11 @@
       "index": "b0W",
       "roundness": null,
       "seed": 1809713969,
-      "version": 140,
-      "versionNonce": 8139089,
-      "isDeleted": false,
+      "version": 143,
+      "versionNonce": 1821507583,
+      "isDeleted": true,
       "boundElements": null,
-      "updated": 1776012431884,
+      "updated": 1776042834745,
       "link": null,
       "locked": false,
       "points": [
@@ -4369,21 +4364,14 @@
         ],
         [
           175.41536458333303,
-          161.51692708333326
+          162.89192708333326
         ],
         [
           351.83072916666697,
-          161.51692708333326
+          162.89192708333326
         ]
       ],
-      "startBinding": {
-        "elementId": "L0PoA27R377jrnRWg1UTt",
-        "mode": "inside",
-        "fixedPoint": [
-          1.0283956160042271,
-          0.49947449450887804
-        ]
-      },
+      "startBinding": null,
       "endBinding": {
         "elementId": "pPWkXlTBG7M9S-Fo9nxH7",
         "mode": "orbit",

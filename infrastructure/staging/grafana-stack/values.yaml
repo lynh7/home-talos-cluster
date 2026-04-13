@@ -101,20 +101,14 @@ grafana-alloy:
             {
               address = "192.168.10.99:9100",
               labels = {
-                job = "external-node",
+                job  = "external-node",
+                node = "external-node",
               },
             },
           ]
 
           scrape_interval = "30s"
           scrape_timeout  = "10s"
-
-          relabel_configs = [
-            {
-              target_label = "node",
-              replacement  = "external-node",
-            },
-          ]
 
           forward_to = [prometheus.remote_write.victoria.receiver]
         }

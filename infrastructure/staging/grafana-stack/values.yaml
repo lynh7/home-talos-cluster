@@ -67,9 +67,9 @@ grafana:
       dashboard-15202:
         gnetId: 15202
         revision: 1
-        datasource: VictoriaMetrics    
-      dashboard-16613:
-        gnetId: 16613
+        datasource: VictoriaMetrics
+      dashboard-21431:
+        gnetId: 21431
         revision: 1
         datasource: VictoriaMetrics    
       dashboard-24056:

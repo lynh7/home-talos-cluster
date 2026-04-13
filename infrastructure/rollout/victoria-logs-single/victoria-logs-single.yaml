@@ -11,7 +11,7 @@ metadata:
     app.kubernetes.io/version: v1.48.0
     helm.sh/chart: victoria-logs-single-0.11.30
   name: victoria-logs-single-server
-  namespace: default
+  namespace: monitoring
 spec:
   type: LoadBalancer
   ports:
@@ -29,7 +29,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: victoria-logs-single-server
-  namespace: default
+  namespace: monitoring
   labels: 
     app: server
     app.kubernetes.io/instance: victoria-logs-single
@@ -143,7 +143,7 @@ metadata:
 spec:
   namespaceSelector:
     matchNames:
-      - default
+      - monitoring
   selector:
     matchLabels: 
       app: server

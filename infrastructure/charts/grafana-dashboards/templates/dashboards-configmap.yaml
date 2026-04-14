@@ -8,7 +8,7 @@ metadata:
   namespace: {{ $root.Release.Namespace }}
   labels:
     grafana_dashboard: "1"
-    {{- include "grafana-dashboards.labels" $root | nindent 4 }}
+    app.kubernetes.io/managed-by: {{ $root.Release.Service }}
   annotations:
     grafana_folder: {{ $root.Values.folder | default "General" | quote }}
 data:

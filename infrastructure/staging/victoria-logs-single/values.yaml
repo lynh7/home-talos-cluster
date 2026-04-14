@@ -12,8 +12,6 @@ server:
       operator: "Equal"
       value: "critical"
       effect: "NoSchedule"
-  nodeSelector:
-    node-role.kubernetes.io/control-plane: ""
   service:
     type: LoadBalancer
   serviceMonitor:

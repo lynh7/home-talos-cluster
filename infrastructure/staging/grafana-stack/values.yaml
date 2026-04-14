@@ -53,6 +53,15 @@ grafana:
           editable: true
           options:
             path: /var/lib/grafana/dashboards/default  
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      folder: /var/lib/grafana/dashboards
+      searchNamespace: monitoring
+      provider:
+        foldersFromFilesStructure: true
 
   persistence:
     type: pvc

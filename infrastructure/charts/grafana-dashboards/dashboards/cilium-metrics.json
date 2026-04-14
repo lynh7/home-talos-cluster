@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 3,
+  "id": 8,
   "links": [],
   "panels": [
     {
@@ -1703,6 +1703,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -1733,7 +1734,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -1803,11 +1805,13 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "maxHeight": 600,
           "mode": "multi",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -1841,6 +1845,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -1871,7 +1876,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -1941,11 +1947,13 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "maxHeight": 600,
           "mode": "multi",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -10680,21 +10688,18 @@
   "preload": false,
   "refresh": "",
   "schemaVersion": 41,
-  "tags": [
-    "cilium",
-    "prometheus"
-  ],
+  "tags": [],
   "templating": {
     "list": [
       {
         "allValue": ".*",
         "current": {
-          "text": "",
-          "value": ""
+          "text": "worker-1",
+          "value": "worker-1"
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "P4169E866C3094E38"
         },
         "definition": "label_values(cilium_version,node)",
         "includeAll": true,
@@ -10730,7 +10735,7 @@
     ]
   },
   "timezone": "utc",
-  "title": "Cilium Metrics",
-  "uid": "cilium-metrics",
+  "title": "Cilium Metrics Copy",
+  "uid": "0a93a907-30c0-4f93-86f2-a34f3b4ed0d7",
   "version": 1
 }

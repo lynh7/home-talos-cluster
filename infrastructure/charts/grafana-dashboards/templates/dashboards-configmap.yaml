@@ -1,0 +1,17 @@
+{{- $root := . }}
+{{- range $path, $_ := .Files.Glob "dashboards/*.json" }}
+{{- $name := base $path | trimSuffix ".json" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "grafana-dashboards.fullname" $root }}-{{ $name }}
+  namespace: {{ $root.Release.Namespace }}
+  labels:
+    grafana_dashboard: "1"
+    {{- include "grafana-dashboards.labels" $root | nindent 4 }}
+  annotations:
+    grafana_folder: {{ $root.Values.folder | default "General" | quote }}
+data:
+  {{ base $path }}: {{ $root.Files.Get $path | toJson }}
+---
+{{- end }}

@@ -52,34 +52,7 @@ grafana:
           disableDeletion: false
           editable: true
           options:
-            path: /var/lib/grafana/dashboards/default
-
-  dashboards:
-    default:
-      dashboard-8171:
-        gnetId: 8171
-        revision: 1
-        datasource: VictoriaMetrics
-      dashboard-17519:
-        gnetId: 17519
-        revision: 1
-        datasource: VictoriaMetrics
-      dashboard-15202:
-        gnetId: 15202
-        revision: 1
-        datasource: VictoriaMetrics
-      dashboard-21431:
-        gnetId: 21431
-        revision: 1
-        datasource: VictoriaMetrics    
-      dashboard-24056:
-        gnetId: 24056
-        revision: 1
-        datasource: VictoriaMetrics
-      dashboard-22084:
-        gnetId: 22084
-        revision: 1
-        datasource: VictoriaMetrics    
+            path: /var/lib/grafana/dashboards/default  
 
   persistence:
     type: pvc

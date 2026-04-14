@@ -25,7 +25,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -148,12 +148,12 @@
         "type": "datasource"
       },
       {
+        "allowCustomValue": false,
         "current": {},
         "datasource": "VictoriaMetrics",
         "definition": "label_values(node_hwmon_temp_celsius,instance)",
         "description": "Node instance",
         "includeAll": false,
-        "multi": true,
         "name": "instance",
         "options": [],
         "query": {

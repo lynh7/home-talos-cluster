@@ -24,8 +24,7 @@
   "panels": [
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "type": "prometheus"
       },
       "description": "Shows how long it takes for Cilium agents to start up and become ready. **Overall Bootstrap** is total startup time, **Daemon Init** is core daemon initialization, and **K8s Init** is Kubernetes integration setup. Green = fast (<5s), Yellow = slow (5-10s), Red = very slow (>10s). High values may indicate resource constraints or network issues.",
       "fieldConfig": {
@@ -83,8 +82,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "cilium_agent_bootstrap_seconds{scope=\"overall\", instance=~\".*\"}",
           "legendFormat": "Overall Bootstrap - {{instance}}",
@@ -92,8 +90,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "cilium_agent_bootstrap_seconds{scope=\"daemonInit\", instance=~\".*\"}",
           "legendFormat": "Daemon Init - {{instance}}",
@@ -101,8 +98,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "cilium_agent_bootstrap_seconds{scope=\"k8sInit\", instance=~\".*\"}",
           "legendFormat": "K8s Init - {{instance}}",
@@ -114,8 +110,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "type": "prometheus"
       },
       "description": "Shows the total count of errors and warnings from Cilium components across all worker nodes. **ERROR** level indicates serious issues that may affect network functionality, **WARN** level indicates potential problems, **INFO** level shows normal operational messages. Zero counts are ideal. Spikes in errors may indicate network policy conflicts, resource exhaustion, or configuration issues. Monitor for sustained error rates or unusual warning patterns.",
       "fieldConfig": {
@@ -172,8 +167,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "cilium_errors_warnings_total{level=\"ERROR\"}",
           "legendFormat": "{{level}} {{subsystem}} {{instance}}",
@@ -186,8 +180,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "type": "prometheus"
       },
       "description": "Shows the total count of errors and warnings from Cilium components across all worker nodes. **ERROR** level indicates serious issues that may affect network functionality, **WARN** level indicates potential problems, **INFO** level shows normal operational messages. Zero counts are ideal. Spikes in errors may indicate network policy conflicts, resource exhaustion, or configuration issues. Monitor for sustained error rates or unusual warning patterns.",
       "fieldConfig": {
@@ -244,8 +237,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "cilium_errors_warnings_total{level=\"WARN\"}",
           "legendFormat": "{{level}} {{subsystem}} {{instance}}",
@@ -258,8 +250,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "type": "prometheus"
       },
       "description": "Shows the distribution of API request methods across Cilium instances. **GET** requests are typically health checks and status queries, **POST** requests are policy updates and configuration changes. Higher rates indicate more active cluster management. Monitor for unusual patterns that might indicate issues or heavy administrative activity.",
       "fieldConfig": {
@@ -343,8 +334,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "cilium_agent_api_process_time_seconds_count{instance=~\".*\"}",
           "legendFormat": "{{method}} ({{return_code}}) - {{instance}} - {{path}}",
@@ -357,8 +347,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "type": "prometheus"
       },
       "description": "Shows the total count of errors and warnings from Cilium components across all worker nodes. **ERROR** level indicates serious issues that may affect network functionality, **WARN** level indicates potential problems, **INFO** level shows normal operational messages. Zero counts are ideal. Spikes in errors may indicate network policy conflicts, resource exhaustion, or configuration issues. Monitor for sustained error rates or unusual warning patterns.",
       "fieldConfig": {
@@ -422,8 +411,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "cilium_errors_warnings_total{level=\"INFO\"}",
           "legendFormat": "{{level}} {{subsystem}} - ({{instance}})",
@@ -436,8 +424,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "type": "prometheus"
       },
       "description": "Shows the distribution of endpoint states in your cluster. **Ready** (green) = endpoints are fully operational, **Regenerating** (yellow) = endpoints are updating policies, **Waiting-for-identity** (orange) = endpoints waiting for security identity assignment, **Restoring** (red) = endpoints recovering from failures. Most endpoints should be in 'Ready' state. High numbers of non-ready endpoints indicate network policy changes, security issues, or cluster instability.",
       "fieldConfig": {
@@ -493,8 +480,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "cilium_endpoint_state{instance=~\".*\"}",
           "legendFormat": "{{instance}} - {{endpoint_state}}",
@@ -507,8 +493,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "type": "prometheus"
       },
       "description": "Shows total memory usage of all BPF (Berkeley Packet Filter) maps combined for each Cilium instance. BPF maps store network state like connection tracking, IP cache, load balancer backends, and container network mappings. Higher values indicate more network state being tracked. Monitor for total capacity approaching limits which could cause performance issues or packet drops.",
       "fieldConfig": {
@@ -572,8 +557,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "cilium_bpf_map_capacity{instance=~\".*\"}",
           "legendFormat": "{{instance}} - {{map_group}}",
@@ -586,8 +570,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "type": "prometheus"
       },
       "description": "Shows the processing time for API requests to Cilium agents. Higher values indicate slower API response times, which may affect cluster management operations, policy updates, or troubleshooting activities. **GET /v1/healthz** = health check latency, **GET /v1/cluster** = cluster status queries. Monitor for sustained high latency which could indicate resource constraints, network issues, or agent performance problems. Critical for operational responsiveness.",
       "fieldConfig": {
@@ -673,8 +656,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "rate(cilium_agent_api_process_time_seconds_count{instance=~\".*\"}[5m])",
           "legendFormat": "{{method}} {{path}} - {{return_code}} ({{instance}})",
@@ -686,8 +668,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "type": "prometheus"
       },
       "description": "Tracks the rate of Kubernetes events (create, update, delete) that Cilium agents receive from the Kubernetes API server. These events trigger network policy updates, endpoint state changes, and service discovery updates. **Create** events = new pods/services, **Update** events = configuration changes, **Delete** events = resource cleanup. High event rates may indicate cluster churn, deployments, or configuration changes. Monitor for correlation with network issues.",
       "fieldConfig": {
@@ -773,8 +754,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "cilium_kubernetes_events_received_total{instance=~\".*\"}",
           "legendFormat": "({{instance}}) {{scope}} - {{action}}",
@@ -787,8 +767,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "type": "prometheus"
       },
       "description": "Shows the rate of operations (create, update, delete) on BPF maps. High operation rates indicate active network state changes like new connections, policy updates, or endpoint modifications. **Update** operations are most common during normal operation. **Delete** operations may indicate connection cleanup or policy changes. Monitor for unusual spikes that could indicate network issues, policy conflicts, or resource pressure.",
       "fieldConfig": {
@@ -874,8 +853,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "rate(cilium_bpf_map_ops_total{instance=~\".*\"}[5m])",
           "legendFormat": "{{map_name}} - {{operation}} ({{instance}})",
@@ -887,8 +865,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "type": "prometheus"
       },
       "description": "Shows the connectivity status between Cilium nodes. **Reachable** = nodes can communicate with each other, **Unreachable** = network connectivity issues, **Unknown** = status cannot be determined. All nodes should show as 'Reachable' for proper cluster operation. Unreachable nodes may indicate network failures, firewall issues, or node problems. This is critical for cluster-wide network policy enforcement and service mesh functionality.",
       "fieldConfig": {
@@ -939,8 +916,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "cilium_node_health_connectivity_status{instance=\"NODE_IP_1:9962\"}",
           "legendFormat": "{{status}} - {{type}}",
@@ -952,8 +928,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "type": "prometheus"
       },
       "description": "Shows the connectivity status between Cilium nodes. **Reachable** = nodes can communicate with each other, **Unreachable** = network connectivity issues, **Unknown** = status cannot be determined. All nodes should show as 'Reachable' for proper cluster operation. Unreachable nodes may indicate network failures, firewall issues, or node problems. This is critical for cluster-wide network policy enforcement and service mesh functionality.",
       "fieldConfig": {
@@ -1004,8 +979,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "cilium_node_health_connectivity_status{instance=\"NODE_IP_2:9962\"}",
           "legendFormat": "{{status}} - {{type}}",
@@ -1017,8 +991,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "type": "prometheus"
       },
       "description": "Shows the connectivity status between Cilium nodes. **Reachable** = nodes can communicate with each other, **Unreachable** = network connectivity issues, **Unknown** = status cannot be determined. All nodes should show as 'Reachable' for proper cluster operation. Unreachable nodes may indicate network failures, firewall issues, or node problems. This is critical for cluster-wide network policy enforcement and service mesh functionality.",
       "fieldConfig": {
@@ -1069,8 +1042,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "cilium_node_health_connectivity_status{instance=\"NODE_IP_3:9962\"}",
           "legendFormat": "{{status}} - {{type}}",
@@ -1082,8 +1054,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "type": "prometheus"
       },
       "description": "Shows the connectivity status between Cilium nodes. **Reachable** = nodes can communicate with each other, **Unreachable** = network connectivity issues, **Unknown** = status cannot be determined. All nodes should show as 'Reachable' for proper cluster operation. Unreachable nodes may indicate network failures, firewall issues, or node problems. This is critical for cluster-wide network policy enforcement and service mesh functionality.",
       "fieldConfig": {
@@ -1134,8 +1105,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "type": "prometheus"
           },
           "expr": "cilium_node_health_connectivity_status{instance=\"NODE_IP_4:9962\"}",
           "legendFormat": "{{status}} - {{type}}",

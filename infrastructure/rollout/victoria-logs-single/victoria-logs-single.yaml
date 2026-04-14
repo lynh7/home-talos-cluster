@@ -106,8 +106,6 @@ spec:
             - name: server-volume
               mountPath: /storage
             
-      nodeSelector: 
-        node-role.kubernetes.io/control-plane: ""
       tolerations: 
         - effect: NoSchedule
           key: critical-components

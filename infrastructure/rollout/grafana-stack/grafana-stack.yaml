@@ -69,12 +69,27 @@ data:
       forward_to = [prometheus.remote_write.victoria.receiver]
     }
     
-    prometheus.scrape "external_node" {
+    prometheus.scrape "external_ubuntu_node" {
       targets = [
         {
           __address__ = "192.168.10.99:9100",
-          job         = "external-node",
-          node        = "external-node",
+          job         = "rasp4-node",
+          node        = "rasp4-node",
+        },
+      ]
+    
+      scrape_interval = "30s"
+      scrape_timeout  = "10s"
+    
+      forward_to = [prometheus.remote_write.victoria.receiver]
+    }
+    
+    prometheus.scrape "external_minidesk_node" {
+      targets = [
+        {
+          __address__ = "192.168.10.52:9100",
+          job         = "minidesk-host",
+          node        = "minidesk-host",
         },
       ]
     
@@ -526,7 +541,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: alloy
-        checksum/config: 461422a1ffc2966a5268208b067f9d333bda4876efb8e21e9120d1555eeefa4
+        checksum/config: 6684ae777083ba9c2f6c745357a2833ed756277c630067cec17465d86d3952d
       labels:
         app.kubernetes.io/name: grafana-alloy
         app.kubernetes.io/instance: grafana-stack

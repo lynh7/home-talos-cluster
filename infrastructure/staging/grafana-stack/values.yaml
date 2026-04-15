@@ -96,12 +96,27 @@ grafana-alloy:
           forward_to = [prometheus.remote_write.victoria.receiver]
         }
 
-        prometheus.scrape "external_node" {
+        prometheus.scrape "external_ubuntu_node" {
           targets = [
             {
               __address__ = "192.168.10.99:9100",
-              job         = "external-node",
-              node        = "external-node",
+              job         = "rasp4-node",
+              node        = "rasp4-node",
+            },
+          ]
+
+          scrape_interval = "30s"
+          scrape_timeout  = "10s"
+
+          forward_to = [prometheus.remote_write.victoria.receiver]
+        }
+
+        prometheus.scrape "external_minidesk_node" {
+          targets = [
+            {
+              __address__ = "192.168.10.52:9100",
+              job         = "minidesk-host",
+              node        = "minidesk-host",
             },
           ]
 

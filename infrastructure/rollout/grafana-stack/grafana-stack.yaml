@@ -99,6 +99,21 @@ data:
       forward_to = [prometheus.remote_write.victoria.receiver]
     }
     
+    prometheus.scrape "external_maindesk_node" {
+      targets = [
+        {
+          __address__ = "192.168.10.51:9100",
+          job         = "maindesk-host",
+          node        = "maindesk-host",
+        },
+      ]
+    
+      scrape_interval = "30s"
+      scrape_timeout  = "10s"
+    
+      forward_to = [prometheus.remote_write.victoria.receiver]
+    }
+    
     prometheus.remote_write "victoria" {
       endpoint {
         url = "http://victoria-metrics-single-server.monitoring.svc.cluster.local:8428/api/v1/write"
@@ -541,7 +556,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: alloy
-        checksum/config: 6684ae777083ba9c2f6c745357a2833ed756277c630067cec17465d86d3952d
+        checksum/config: 648405908cfec898bca0ead88f40ac54d29734b799e46777747bbba3654cb44
       labels:
         app.kubernetes.io/name: grafana-alloy
         app.kubernetes.io/instance: grafana-stack

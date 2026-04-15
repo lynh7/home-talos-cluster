@@ -126,6 +126,21 @@ grafana-alloy:
           forward_to = [prometheus.remote_write.victoria.receiver]
         }
 
+        prometheus.scrape "external_maindesk_node" {
+          targets = [
+            {
+              __address__ = "192.168.10.51:9100",
+              job         = "maindesk-host",
+              node        = "maindesk-host",
+            },
+          ]
+
+          scrape_interval = "30s"
+          scrape_timeout  = "10s"
+
+          forward_to = [prometheus.remote_write.victoria.receiver]
+        }
+
         prometheus.remote_write "victoria" {
           endpoint {
             url = "http://victoria-metrics-single-server.monitoring.svc.cluster.local:8428/api/v1/write"

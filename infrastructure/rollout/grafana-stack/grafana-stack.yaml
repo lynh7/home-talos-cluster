@@ -129,6 +129,21 @@ data:
       forward_to = [prometheus.remote_write.victoria.receiver]
     }
     
+    prometheus.scrape "haproxy_router" {
+      targets = [
+        {
+          __address__ = "192.168.10.1:8405/metrics",
+          job         = "haproxy-router",
+          node        = "haproxy-router",
+        },
+      ]
+    
+      scrape_interval = "30s"
+      scrape_timeout  = "10s"
+    
+      forward_to = [prometheus.remote_write.victoria.receiver]
+    }
+    
     prometheus.remote_write "victoria" {
       endpoint {
         url = "http://victoria-metrics-single-server.monitoring.svc.cluster.local:8428/api/v1/write"
@@ -571,7 +586,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: alloy
-        checksum/config: e13d39e06c30834f202207f24920f133e29c5a47d0f3a3825fcf10f27dfe876
+        checksum/config: f2efc52202525f4dd5c9a70e4597106d45b5668f207e6ec3db82ab419b8e814
       labels:
         app.kubernetes.io/name: grafana-alloy
         app.kubernetes.io/instance: grafana-stack

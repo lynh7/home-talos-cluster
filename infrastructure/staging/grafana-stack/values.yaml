@@ -159,7 +159,8 @@ grafana-alloy:
         prometheus.scrape "haproxy_router" {
           targets = [
             {
-              __address__ = "192.168.10.1:8405/metrics",
+              __address__ = "192.168.10.1:8405",
+              __metrics_path__ = "/metrics",
               job         = "haproxy-router",
               node        = "haproxy-router",
             },

@@ -134,7 +134,7 @@ cgroup:
 ########### Gateway API configuration ############
 ##################################################
 ingressController:
-  enabled: false
+  enabled: true
 gatewayAPI:
   enabled: true
 

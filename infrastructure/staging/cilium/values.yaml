@@ -133,11 +133,11 @@ cgroup:
 ##################################################
 ########### Gateway API configuration ############
 ##################################################
-envoyConfig:
-  # -- Enable CiliumEnvoyConfig CRD
-  enabled: true
-gatewayAPI:
-  enabled: true
+# envoyConfig:
+#   # -- Enable CiliumEnvoyConfig CRD
+#   enabled: true
+# gatewayAPI:
+#   enabled: true
 
 
 ##################################################

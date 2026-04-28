@@ -133,7 +133,8 @@ cgroup:
 ##################################################
 ########### Gateway API configuration ############
 ##################################################
-ingressController:
+envoyConfig:
+  # -- Enable CiliumEnvoyConfig CRD
   enabled: true
 gatewayAPI:
   enabled: true

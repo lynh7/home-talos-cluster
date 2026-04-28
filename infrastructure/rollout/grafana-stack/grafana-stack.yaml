@@ -132,7 +132,8 @@ data:
     prometheus.scrape "haproxy_router" {
       targets = [
         {
-          __address__ = "192.168.10.1:8405/metrics",
+          __address__ = "192.168.10.1:8405",
+          __metrics_path__ = "/metrics",
           job         = "haproxy-router",
           node        = "haproxy-router",
         },
@@ -586,7 +587,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: alloy
-        checksum/config: f2efc52202525f4dd5c9a70e4597106d45b5668f207e6ec3db82ab419b8e814
+        checksum/config: 1cc772bb4e34b3d0ff2798070802ee4ff8ec44fee8075f5bd3462483f81104b
       labels:
         app.kubernetes.io/name: grafana-alloy
         app.kubernetes.io/instance: grafana-stack

@@ -1,0 +1,545 @@
+# Kyoo consists of multiple services, please view diagrams for additional context
+# https://github.com/zoriya/Kyoo/blob/master/DIAGRAMS.md
+
+# global configures shared microservices and subcharts settings
+global:
+  image:
+    repositoryBase: "ghcr.io/zoriya"
+    tag: ""
+    imagePullPolicy: IfNotPresent
+  imagePullSecrets: []
+  configmapAnnotations: {}
+  deploymentAnnotations: {}
+  persistentVolumeClaimAnnotations: {}
+  podAnnotations: {}
+  podLabels: {}
+  securityContext: {}
+  containerSecurityContext: {}
+  extraEnv: []
+  extraVolumes: []
+  extraVolumeMounts: []
+
+  # kyoo connectivity & subchart settings for postgres
+  # subchart configuration can be found at .postgresql
+  postgres:
+    # subchart specific settings
+    infra:
+      # subchart does not accept setting username via secret, so defining here
+      user: kyoo_all
+      passwordKey: postgres_password
+      existingSecret: bigsecret
+    # shared postgres settings
+    shared:
+      # base setting for specifying host for all kyoo workloads
+      # defaults to <release-name>-postgres
+      host: ~
+      # base setting for specifying ports for all kyoo workloads
+      port: 5432
+      # setting the database here will override the other database settings
+      databaseOverride: ~
+      userOverride: ~
+      passwordOverride: ~
+      sslmodeOverride: ~
+      # base setting for specifying existingSecret for all kyoo workloads
+      existingSecret: bigsecret
+      # base setting for specifying userKey for all kyoo workloads
+      userKey: postgres_user
+      # base setting for specifying passwordKey for all kyoo workloads
+      passwordKey: postgres_password
+    # overlay settings for connecting to kyoo_api database
+    kyoo_api:
+      host: ~
+      port: ~
+      database: kyoo_api
+      # upstream sql library does not support 'prefer' sslmode
+      # tracking: https://github.com/zoriya/Kyoo/issues/1154
+      sslmode: disable
+      # kyoo_api workload specific settings
+      kyoo_api:
+        userKey: ~
+        passwordKey: ~
+        existingSecret: ~
+    # overlay settings for connecting to kyoo_auth database
+    kyoo_auth:
+      host: ~
+      port: ~
+      database: kyoo_auth
+      sslmode: prefer
+      # kyoo_auth workload specific settings
+      kyoo_auth:
+        userKey: ~
+        passwordKey: ~
+        existingSecret: ~
+    # overlay settings for connecting to kyoo_scanner database
+    kyoo_scanner:
+      host: ~
+      port: ~
+      database: kyoo_scanner
+      sslmode: prefer
+      # kyoo_scanner workload specific settings
+      kyoo_scanner:
+        userKey: ~
+        passwordKey: ~
+        existingSecret: ~
+    # overlay settings for connecting to kyoo_transcoder database
+    kyoo_transcoder:
+      host: ~
+      port: ~
+      database: kyoo_transcoder
+      sslmode: prefer
+      # kyoo_transcoder workload specific settings
+      kyoo_transcoder:
+        userKey: ~
+        passwordKey: ~
+        existingSecret: ~
+
+# kyoo application settings
+kyoo:
+  # The url you can use to reach your kyoo instance. This is used during oidc to redirect users to your instance.
+  address: "https://kyoo.mydomain.com"
+  # base url for accessing kyoo microservices behind middleware proxy
+  # defaults to traefikproxy service unless specified otherwise
+  middlewareRootURL: ~
+
+  # auth settings
+  auth:
+    firstUserClaims: '{"permissions": ["users.read", "users.write", "apikeys.read", "apikeys.write", "users.delete", "core.read", "core.write", "core.play", "scanner.trigger", "scanner.guess", "scanner.search", "scanner.add"], "verified": true}'
+    guestClaims: '{"permissions": ["core.read"], "verified": true}'
+    extraClaims: '{"permissions": ["core.read", "core.play"], "verified": false}'
+    protectedClaims: "permissions,verified"
+
+    # Providing a private key is optional, one will be generated at startup
+    privatekey:
+      existingSecret: ~
+      privatekeyKey: private_key_rsa
+
+    apikeys:
+      scanner:
+        existingSecret: bigsecret
+        apikeyKey: scanner_apikey
+        claims: '{"permissions": ["core.read", "core.write"]}'
+      # create additional apikeys
+      extra: []
+        # - name: example
+        #   existingSecret: bigsecret
+        #   apikeyKey: example_apikey
+        #   claims: '{"permissions": ["core.read"]}'
+
+  # A pattern (regex) to ignore video files.
+  libraryIgnorePattern: ".*/[dD]ownloads?/.*"
+  # hardware acceleration profile (valid values: disabled, vaapi, qsv, nvidia)
+  transcoderAcceleration: disabled
+  # the preset used during transcode. faster means worst quality, you can probably use a slower preset with hwaccels
+  # warning: using vaapi hwaccel disable presets (they are not supported).
+  transcoderPreset: fast
+  # oidc_providers is a list of oidc providers that you want to use for authentication.
+  # see the example below for how to configure an oidc provider.
+  oidc_providers: []
+    # - name: example
+    #   existingSecret: bigsecret
+    #   clientIdKey: clientId
+    #   clientSecretKey: clientSecret
+    #   logo: https://url-of-your-logo.com
+    #   authorizationAddress: https://url-of-the-authorization-endpoint-of-the-oidc-service.com/auth
+    #   tokenAddress: https://url-of-the-token-endpoint-of-the-oidc-service.com/token
+    #   profileAddress: https://url-of-the-profile-endpoint-of-the-oidc-service.com/userinfo
+    #   scope: "email openid profile"
+    #   authMethod: ClientSecretBasic
+
+# configures workloads that require access to media
+media:
+  # specifies the volumes to use
+  volumes:
+    # default volume configuration to allow for easier demo and testing
+    # most setups will aim to leverage NFS to access media
+    # - name: media
+    #   nfs:
+    #     server: mynasserver.mydomain.com
+    #     path: /spin0/media
+    - name: media
+      persistentVolumeClaim:
+        claimName: media
+
+  # specifies where to mount the volumes
+  # note that this should align with .media.baseMountPath
+  volumeMounts:
+    - mountPath: /media
+      name: media
+      readOnly: true
+  # configures kyoo workloads to search
+  # note that this should align with .media.volumeMounts[].mountPath
+  baseMountPath: "/media"
+
+# configures workloads that require access to contentdatabase
+# unused until autosync pulled into kyoo_api
+contentdatabase:
+  # TheMovieDB
+  tmdb:
+    apikeyKey: tmdb_apikey
+    existingSecret: bigsecret
+  # TVDatabase
+  tvdb:
+    apikeyKey: tvdb_apikey
+    pinKey: tvdb_pin
+    existingSecret: bigsecret
+
+# api deployment configuration
+api:
+  name: api
+  # kyoo_api container configuration
+  kyoo_api:
+    livenessProbe:
+      httpGet:
+        path: /api/health
+        port: main
+    readinessProbe:
+      httpGet:
+        path: /api/ready
+        port: main
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs: []
+    extraEnv: []
+    image:
+      repository: ~
+      tag: ~
+    volumeMounts: []
+  volumes: []
+  replicaCount: 1
+  # default to recreate for better user experience with ReadWriteOnce volumes
+  updateStrategy:
+    type: Recreate
+  securityContext: {}
+  podLabels: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+  # api image data
+  # user profile pictures
+  persistence:
+    enabled: true
+    size: 3Gi
+    annotations: {}
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    existingClaim: ""
+
+# auth deployment configuration
+auth:
+  name: auth
+  # kyoo_auth container configuration
+  kyoo_auth:
+    livenessProbe:
+      httpGet:
+        path: /auth/health
+        port: main
+    readinessProbe:
+      httpGet:
+        path: /auth/ready
+        port: main
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs: []
+    extraEnv: []
+    image:
+      repository: ~
+      tag: ~
+  replicaCount: 1
+  updateStrategy: ~
+  securityContext: {}
+  podLabels: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+  # profile pictures of users
+  persistence:
+    enabled: true
+    size: 500Mi
+    annotations: {}
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    existingClaim: ""
+
+# front deployment configuration
+front:
+  name: front
+  # kyoo_front container configuration
+  kyoo_front:
+    livenessProbe: {}
+    readinessProbe: {}
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs: []
+    extraEnv: []
+    image:
+      repository: ~
+      tag: ~
+  replicaCount: 1
+  updateStrategy: ~
+  securityContext: {}
+  podLabels: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+
+# scanner deployment configuration
+scanner:
+  name: scanner
+  # kyoo_scanner container configuration
+  kyoo_scanner:
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: main
+    readinessProbe:
+      httpGet:
+        path: /ready
+        port: main
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs: []
+    extraEnv: []
+    image:
+      repository: ~
+      tag: ~
+  # scanner does not support multiple replicas
+  replicaCount: 1
+  updateStrategy: ~
+  securityContext: {}
+  podLabels: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+
+# transcoder deployment configuration
+transcoder:
+  name: transcoder
+  # can be used if you have a gpu runtime class
+  runtimeClass: ""
+  # resourceClaims for Dynamic Resource Allocation (DRA)
+  # useful for GPU access via ResourceClaimTemplates (Kubernetes 1.32+)
+  # example:
+  #   resourceClaims:
+  #     - name: gpu
+  #       resourceClaimTemplateName: gpu-claim-template
+  # then reference in kyoo_transcoder.resources:
+  #   claims:
+  #     - name: gpu
+  resourceClaims: []
+  # kyoo_transcoder container configuration
+  kyoo_transcoder:
+    livenessProbe:
+      httpGet:
+        path: /video/health
+        port: main
+    readinessProbe:
+      httpGet:
+        path: /video/ready
+        port: main
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs: []
+    extraEnv: []
+    image:
+      repository: ~
+      tag: ~
+    volumeMounts:
+      - mountPath: /cache
+        name: cache
+  volumes:
+    - name: cache
+      emptyDir: {}
+  replicaCount: 1
+  # default to recreate for better user experience with ReadWriteOnce volumes & hardware resources
+  updateStrategy:
+    type: Recreate
+  securityContext: {}
+  podLabels: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+  # transcodermetadata
+  # thumbnail images & subtiles
+  persistence:
+    enabled: true
+    size: 3Gi
+    annotations: {}
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    existingClaim: ""
+
+ingress:
+  enabled: false
+  ingressClassName: ~
+  annotations: {}
+  extraAnnotations: {}
+  host: kyoo.mydomain.com
+  tls: false
+  tlsSecret: ~
+
+# traefikproxy deployment configuration
+traefikproxy:
+  enabled: true
+  defaultConfigmap: true
+  name: traefik
+  # traefik container configuration
+  traefik:
+    livenessProbe: {}
+    readinessProbe: {}
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs:
+      - "--entryPoints.web.address=:80/tcp"
+      - "--entryPoints.websecure.address=:443/tcp"
+      - "--entryPoints.web.forwardedHeaders.insecure=true"
+      - "--entryPoints.websecure.forwardedHeaders.insecure=true"
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--log.level=INFO"
+      - "--providers.file.filename=/dynamic_config/dynamic_config.yaml"
+    extraEnv: []
+    image:
+      repository: docker.io/traefik
+      tag: v3.6.13
+  replicaCount: 1
+  updateStrategy: ~
+  securityContext: {}
+  podLabels: {}
+  configmapAnnotations: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+
+# subchart settings
+postgres:
+  enabled: false
+  auth:
+    # default user to be created by postgres subchart
+    # subchart is unable to consume a secret for specifying user
+    username: "{{ .Values.global.postgres.infra.user }}"
+    existingSecret: "{{ .Values.global.postgres.infra.existingSecret }}"
+    secretKeys:
+      # set the postgres user password to the same as our user
+      adminPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
+  initdb:
+    scripts:
+      kyoo_api.sql: |
+        CREATE DATABASE {{ .Values.global.postgres.kyoo_api.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
+        \connect {{ .Values.global.postgres.kyoo_api.database }};
+        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        CREATE SCHEMA IF NOT EXISTS kyoo AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+
+        CREATE EXTENSION IF NOT EXISTS pg_trgm SCHEMA kyoo;
+        SET pg_trgm.word_similarity_threshold = 0.4;
+        ALTER DATABASE {{ .Values.global.postgres.kyoo_api.database }} SET pg_trgm.word_similarity_threshold = 0.4;
+      kyoo_auth.sql: |
+        CREATE DATABASE {{ .Values.global.postgres.kyoo_auth.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
+        \connect {{ .Values.global.postgres.kyoo_auth.database }};
+        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        CREATE SCHEMA IF NOT EXISTS keibi AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+      kyoo_scanner.sql: |
+        CREATE DATABASE {{ .Values.global.postgres.kyoo_scanner.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
+        \connect {{ .Values.global.postgres.kyoo_scanner.database }};
+        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        CREATE SCHEMA IF NOT EXISTS scanner AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+      kyoo_transcoder.sql: |
+        CREATE DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
+        \connect {{ .Values.global.postgres.kyoo_transcoder.database }};
+        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        CREATE SCHEMA IF NOT EXISTS gocoder AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+      user.sql: |
+        ALTER ROLE {{ .Values.global.postgres.infra.user }}
+        IN DATABASE {{ .Values.global.postgres.kyoo_api.database }} SET search_path TO "$user", kyoo;
+        ALTER ROLE {{ .Values.global.postgres.infra.user }}
+        IN DATABASE {{ .Values.global.postgres.kyoo_auth.database }} SET search_path TO "$user", keibi;
+        ALTER ROLE {{ .Values.global.postgres.infra.user }}
+        IN DATABASE {{ .Values.global.postgres.kyoo_scanner.database }} SET search_path TO "$user", scanner;
+        ALTER ROLE {{ .Values.global.postgres.infra.user }}
+        IN DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} SET search_path TO "$user", gocoder;
+  persistence:
+    enabled: true
+    size: 3Gi
+
+# allows for the creation of any additional kubernetes resources
+extraObjects: []

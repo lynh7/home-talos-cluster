@@ -1,0 +1,15 @@
+apiVersion: v2
+name: kyoo
+description: Kyoo is an open source media server alternative to Jellyfin and Plex.
+
+type: application
+version: 0.0.0
+appVersion: "0.0.0"
+
+icon: https://raw.githubusercontent.com/zoriya/Kyoo/refs/heads/master/icons/icon.svg
+
+dependencies:
+- condition: postgres.enabled
+  name: postgres
+  repository: oci://registry-1.docker.io/cloudpirates
+  version: 0.12.4

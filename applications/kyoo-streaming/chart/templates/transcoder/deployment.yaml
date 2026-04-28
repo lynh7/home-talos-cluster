@@ -1,0 +1,179 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.transcoder.deploymentAnnotations) }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+  name: {{ include "kyoo.transcoder.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kyoo.labels" (dict "context" . "component" .Values.transcoder.name "name" .Values.transcoder.name) | nindent 4 }}
+spec:
+  replicas: {{ .Values.transcoder.replicaCount }}
+  {{- with .Values.transcoder.updateStrategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.transcoder.name) | nindent 6 }}
+  template:
+    metadata:
+      {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.transcoder.podAnnotations) }}
+      annotations:
+        {{- range $key, $value := . }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      {{- end }}
+      labels:
+        {{- include "kyoo.labels" (dict "context" . "component" .Values.transcoder.name "name" .Values.transcoder.name) | nindent 8 }}
+        {{- with (mergeOverwrite (deepCopy .Values.global.podLabels) .Values.transcoder.podLabels) }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.transcoder.runtimeClass }}
+      runtimeClassName: {{ . }}
+      {{- end }}
+      {{- with .Values.transcoder.resourceClaims }}
+      resourceClaims:
+        {{- range . }}
+        - name: {{ .name }}
+          resourceClaimTemplateName: {{ .resourceClaimTemplateName }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.transcoder.imagePullSecrets | default .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with (mergeOverwrite (deepCopy .Values.global.securityContext) .Values.transcoder.securityContext) }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "kyoo.transcoder.serviceAccountName" . }}
+      containers:
+        - name: main
+          image: {{ .Values.transcoder.kyoo_transcoder.image.repository | default (printf "%s/kyoo_transcoder" .Values.global.image.repositoryBase) }}:{{ default (include "kyoo.defaultTag" .) .Values.transcoder.kyoo_transcoder.image.tag }}
+          imagePullPolicy: {{ default .Values.global.image.imagePullPolicy }}
+          args:
+            {{- with .Values.transcoder.kyoo_transcoder.extraArgs }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          env:
+            - name: JWKS_URL
+              value: "http://{{ include "kyoo.auth.fullname" . }}:4568/.well-known/jwks.json"
+            - name: GOCODER_HWACCEL
+              value: {{ .Values.kyoo.transcoderAcceleration | quote }}
+            - name: GOCODER_PRESET
+              value: {{ .Values.kyoo.transcoderPreset | quote }}
+            - name: GOCODER_CACHE_ROOT
+              value: "/cache"
+            - name: GOCODER_METADATA_ROOT
+              value: "/metadata"
+            # the vaapi device path (only used with GOCODER_HWACCEL=vaapi)
+            - name: GOCODER_VAAPI_RENDERER
+              value: "/dev/dri/renderD128"
+            # the qsv device path (only used with GOCODER_HWACCEL=qsv)
+            - name: GOCODER_QSV_RENDERER
+              value: "/dev/dri/renderD128"
+            - name: GOCODER_SAFE_PATH
+              value: {{ .Values.media.baseMountPath | quote }}
+            - name: PGUSER
+              {{- if .Values.global.postgres.shared.userOverride }}
+              value: {{ .Values.global.postgres.shared.userOverride | quote }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  key: {{ default .Values.global.postgres.shared.userKey .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.userKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret }}
+              {{- end }}
+            - name: PGPASSWORD
+              {{- if .Values.global.postgres.shared.passwordOverride }}
+              value: {{ .Values.global.postgres.shared.passwordOverride | quote }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  key: {{ default .Values.global.postgres.shared.passwordKey .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.passwordKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret }}
+              {{- end }}
+            - name: PGDATABASE
+              value: {{ default .Values.global.postgres.kyoo_transcoder.database .Values.global.postgres.shared.databaseOverride | quote }}
+            - name: PGHOST
+              value: {{ default (include "kyoo.postgres.shared.host" .) .Values.global.postgres.kyoo_transcoder.host | quote}}
+            - name: PGPORT
+              value: {{ default .Values.global.postgres.shared.port .Values.global.postgres.kyoo_transcoder.port | quote }}
+            - name: PGSSLMODE
+              value: {{ default .Values.global.postgres.kyoo_transcoder.sslmode .Values.global.postgres.shared.sslmodeOverride | quote }}
+            {{- with (concat .Values.global.extraEnv .Values.transcoder.kyoo_transcoder.extraEnv) }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: main
+              containerPort: 7666
+              protocol: TCP
+          {{- with .Values.transcoder.kyoo_transcoder.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.transcoder.kyoo_transcoder.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.transcoder.kyoo_transcoder.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with (mergeOverwrite (deepCopy .Values.global.containerSecurityContext) .Values.transcoder.kyoo_transcoder.containerSecurityContext) }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            {{- with .Values.global.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.media.volumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- if .Values.transcoder.persistence.enabled }}
+            - name: transcodermetadata
+              mountPath: /metadata
+            {{- end }}
+            {{- with .Values.transcoder.kyoo_transcoder.volumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.transcoder.kyoo_transcoder.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- with .Values.transcoder.extraContainers }}
+          {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+      {{- with .Values.transcoder.extraInitContainers }}
+      initContainers:
+        {{- tpl (toYaml .) $ | nindent 6 }}
+      {{- end }}
+      volumes:
+        {{- with .Values.global.extraVolumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.media.volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.transcoder.persistence.enabled }}
+        {{- if .Values.transcoder.persistence.existingClaim }}
+        - name: transcodermetadata
+          persistentVolumeClaim:
+            claimName: {{ .Values.transcoder.persistence.existingClaim }}
+        {{- else }}
+        - name: transcodermetadata
+          persistentVolumeClaim:
+            claimName: {{ include "kyoo.transcodermetadata.fullname" . }}
+        {{- end }}
+        {{- end }}
+        {{- with .Values.transcoder.volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.transcoder.extraVolumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}

@@ -31,7 +31,7 @@ jobs:
       - name: Bump patch version in Chart.yaml
         id: bump
         run: |
-          CHART_FILE="infrastructure/chart/Chart.yaml"  # Adjust if path differs
+          CHART_FILE="infrastructure/charts/grafana-dashboards/Chart.yaml" #Hardcoded path to the Chart.yaml file
           if [ ! -f "$CHART_FILE" ]; then
             echo "Error: $CHART_FILE not found"
             exit 1

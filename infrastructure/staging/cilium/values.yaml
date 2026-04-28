@@ -133,7 +133,8 @@ cgroup:
 ##################################################
 ########### Gateway API configuration ############
 ##################################################
-
+ingressController:
+  enabled: false
 gatewayAPI:
   enabled: true
 

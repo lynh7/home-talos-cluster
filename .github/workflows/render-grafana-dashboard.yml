@@ -1,0 +1,62 @@
+name: Render Grafana Dashboards chart
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infrastructure/charts/grafana-dashboards'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Bump patch version in Chart.yaml
+        id: bump
+        run: |
+          CHART_FILE="infrastructure/chart/Chart.yaml"  # Adjust if path differs
+          if [ ! -f "$CHART_FILE" ]; then
+            echo "Error: $CHART_FILE not found"
+            exit 1
+          fi
+
+          # Read current version
+          CURRENT_VERSION=$(yq '.version' "$CHART_FILE")
+          echo "Current version: $CURRENT_VERSION"
+
+          # Split into major.minor.patch (assuming semantic versioning)
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+          PATCH=$((PATCH + 1))
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "New version: $NEW_VERSION"
+
+          # Update the file
+          yq -i ".version = \"$NEW_VERSION\"" "$CHART_FILE"
+
+          # Set output for later use
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Commit rendered manifests
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add infrastructure/rollout/*.yaml
+          git commit -m "Auto-render updated Helm manifests" || echo "No changes"
+          git push

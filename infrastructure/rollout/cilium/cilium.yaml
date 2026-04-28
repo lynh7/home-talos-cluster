@@ -94,6 +94,17 @@ data:
   enable-metrics: "true"
   enable-envoy-config: "true"
   envoy-config-retry-interval: "15s"
+  enable-ingress-controller: "true"
+  enforce-ingress-https: "true"
+  enable-ingress-proxy-protocol: "false"
+  enable-ingress-secrets-sync: "true"
+  ingress-secrets-namespace: "cilium-secrets"
+  ingress-lb-annotation-prefixes: "lbipam.cilium.io nodeipam.cilium.io service.beta.kubernetes.io service.kubernetes.io cloud.google.com"
+  ingress-default-lb-mode: dedicated
+  ingress-shared-lb-service-name: cilium-ingress
+  ingress-hostnetwork-enabled: "false"
+  ingress-hostnetwork-shared-listener-port: "8080"
+  ingress-hostnetwork-nodelabelselector: ""
   enable-gateway-api: "true"
   enable-gateway-api-secrets-sync: "true"
   enable-gateway-api-proxy-protocol: "false"
@@ -702,6 +713,21 @@ rules:
   - get
   - update
 - apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  - ingressclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/status # To update ingress status with load balancer IP.
+  verbs:
+  - update
+- apiGroups:
   - gateway.networking.k8s.io
   resources:
   - gatewayclasses
@@ -851,6 +877,24 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
+  name: cilium-ingress-secrets
+  namespace: "cilium-secrets"
+  labels:
+    app.kubernetes.io/part-of: cilium
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+---
+# Source: cilium/templates/cilium-agent/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
   name: cilium-gateway-secrets
   namespace: "cilium-secrets"
   labels:
@@ -882,6 +926,25 @@ rules:
   - get
   - list
   - watch
+---
+# Source: cilium/templates/cilium-operator/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cilium-operator-ingress-secrets
+  namespace: "cilium-secrets"
+  labels:
+    app.kubernetes.io/part-of: cilium
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - update
+  - patch
 ---
 # Source: cilium/templates/cilium-operator/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -923,6 +986,23 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
+  name: cilium-secrets
+  namespace: "cilium-secrets"
+  labels:
+    app.kubernetes.io/part-of: cilium
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cilium-ingress-secrets
+subjects:
+  - kind: ServiceAccount
+    name: "cilium"
+    namespace: kube-system
+---
+# Source: cilium/templates/cilium-agent/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
   name: cilium-gateway-secrets
   namespace: "cilium-secrets"
   labels:
@@ -952,6 +1032,23 @@ subjects:
 - kind: ServiceAccount
   name: "cilium"
   namespace: kube-system
+---
+# Source: cilium/templates/cilium-operator/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cilium-operator-ingress-secrets
+  namespace: "cilium-secrets"
+  labels:
+    app.kubernetes.io/part-of: cilium
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cilium-operator-ingress-secrets
+subjects:
+  - kind: ServiceAccount
+    name: "cilium-operator"
+    namespace: kube-system
 ---
 # Source: cilium/templates/cilium-operator/rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -1012,6 +1109,27 @@ spec:
     port: 9964
     protocol: TCP
     targetPort: envoy-metrics
+---
+# Source: cilium/templates/cilium-ingress-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: cilium-ingress
+  namespace: kube-system
+  labels:
+    cilium.io/ingress: "true"
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    nodePort: 
+  - name: https
+    port: 443
+    protocol: TCP
+    nodePort: 
+  type: LoadBalancer
+  externalTrafficPolicy: Cluster
 ---
 # Source: cilium/templates/cilium-operator/service.yaml
 kind: Service
@@ -2040,6 +2158,14 @@ spec:
       - emptyDir: {}
         name: tmp-dir
 ---
+# Source: cilium/templates/cilium-ingress-class.yaml
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: cilium
+spec:
+  controller: cilium.io/ingress-controller
+---
 # Source: cilium/templates/cilium-customizations/49-cilium-l2-policy-announcement.yaml
 apiVersion: cilium.io/v2alpha1
 kind: CiliumL2AnnouncementPolicy
@@ -2060,6 +2186,18 @@ spec:
   blocks:
   -
     cidr: "192.168.100.0/26"
+---
+# Source: cilium/templates/cilium-ingress-service.yaml
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: cilium-ingress
+  namespace: kube-system
+subsets:
+- addresses:
+  - ip: "192.192.192.192"
+  ports:
+  - port: 9999
 ---
 # Source: cilium/templates/cilium-agent/servicemonitor.yaml
 apiVersion: monitoring.coreos.com/v1

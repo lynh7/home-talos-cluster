@@ -1,4 +1,10 @@
 ---
+# Source: cilium/templates/cilium-secrets-namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "cilium-secrets"
+---
 # Source: cilium/templates/cilium-agent/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -86,6 +92,18 @@ data:
   # is scheduled.
   operator-prometheus-serve-addr: ":9963"
   enable-metrics: "true"
+  enable-envoy-config: "true"
+  envoy-config-retry-interval: "15s"
+  enable-gateway-api: "true"
+  enable-gateway-api-secrets-sync: "true"
+  enable-gateway-api-proxy-protocol: "false"
+  enable-gateway-api-app-protocol: "false"
+  enable-gateway-api-alpn: "false"
+  gateway-api-xff-num-trusted-hops: "0"
+  gateway-api-service-externaltrafficpolicy: "Cluster"
+  gateway-api-secrets-namespace: "cilium-secrets"
+  gateway-api-hostnetwork-enabled: "false"
+  gateway-api-hostnetwork-nodelabelselector: ""
 
   # Enable IPv4 addressing. If enabled, all endpoints are allocated an IPv4
   # address.
@@ -513,6 +531,7 @@ rules:
   resources:
   # to check apiserver connectivity
   - namespaces
+  - secrets
   verbs:
   - get
   - list
@@ -527,6 +546,10 @@ rules:
   - get
   - list
   - watch
+  - create
+  - update
+  - delete
+  - patch
 - apiGroups:
   - cilium.io
   resources:
@@ -678,6 +701,39 @@ rules:
   - create
   - get
   - update
+- apiGroups:
+  - gateway.networking.k8s.io
+  resources:
+  - gatewayclasses
+  - gateways
+  - tlsroutes
+  - httproutes
+  - grpcroutes
+  - referencegrants
+  - referencepolicies
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - gateway.networking.k8s.io
+  resources:
+  - gatewayclasses/status
+  - gateways/status
+  - httproutes/status
+  - grpcroutes/status
+  - tlsroutes/status
+  verbs:
+  - update
+  - patch
+- apiGroups:
+  - multicluster.x-k8s.io
+  resources:
+  - serviceimports
+  verbs:
+  - get
+  - list
+  - watch
 ---
 # Source: cilium/templates/hubble-ui/clusterrole.yaml
 kind: ClusterRole
@@ -795,6 +851,24 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
+  name: cilium-gateway-secrets
+  namespace: "cilium-secrets"
+  labels:
+    app.kubernetes.io/part-of: cilium
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+---
+# Source: cilium/templates/cilium-agent/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
   name: cilium-bgp-control-plane-secrets
   namespace: "kube-system"
   labels:
@@ -808,6 +882,25 @@ rules:
   - get
   - list
   - watch
+---
+# Source: cilium/templates/cilium-operator/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cilium-operator-gateway-secrets
+  namespace: "cilium-secrets"
+  labels:
+    app.kubernetes.io/part-of: cilium
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - update
+  - patch
 ---
 # Source: cilium/templates/cilium-agent/rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -830,6 +923,23 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
+  name: cilium-gateway-secrets
+  namespace: "cilium-secrets"
+  labels:
+    app.kubernetes.io/part-of: cilium
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cilium-gateway-secrets
+subjects:
+- kind: ServiceAccount
+  name: "cilium"
+  namespace: kube-system
+---
+# Source: cilium/templates/cilium-agent/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
   name: cilium-bgp-control-plane-secrets
   namespace: "kube-system"
   labels:
@@ -841,6 +951,23 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: "cilium"
+  namespace: kube-system
+---
+# Source: cilium/templates/cilium-operator/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cilium-operator-gateway-secrets
+  namespace: "cilium-secrets"
+  labels:
+    app.kubernetes.io/part-of: cilium
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cilium-operator-gateway-secrets
+subjects:
+- kind: ServiceAccount
+  name: "cilium-operator"
   namespace: kube-system
 ---
 # Source: cilium/templates/cilium-agent/service.yaml

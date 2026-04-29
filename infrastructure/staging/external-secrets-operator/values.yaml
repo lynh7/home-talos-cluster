@@ -1,2 +1,7 @@
 vaultwarden:
-  
+  dashboard:
+    enabled: true
+  monitoring:
+  # Enable Prometheus ServiceMonitor (requires Prometheus Operator)
+  serviceMonitor:
+    enabled: true

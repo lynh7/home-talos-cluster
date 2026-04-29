@@ -1,4 +1,14 @@
 ---
+# Source: cert-manager/templates/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged
+---
 # Source: cert-manager/charts/cert-manager/templates/cainjector-serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
